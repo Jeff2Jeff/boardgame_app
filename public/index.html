@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+    </head>
+    <body>
+
+        <form name="rollform" action="/roll" method="POST" autocomplete="off">
+            
+            <div>
+                <label>Number of players</label>
+                <input name="player_num" type="number" required>
+            </div>
+            <div>
+                <label>Duration between </label>
+                <input name="duration_min" required>
+                <label>and</label>
+                <input name="duration_max" required>
+                <label>minutes</label>
+            </div>
+            <div>
+                <label>Minimal age</label>
+                <input name="player_age_min" required>
+            </div>
+
+            <button type="submit">Select game!</button>
+        </form>
+
+    </body>
+</html>
