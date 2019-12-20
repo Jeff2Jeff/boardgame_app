@@ -5,26 +5,34 @@
     </head>
     <body>
 
-        <form name="rollform" action="/roll" method="POST" autocomplete="off">
+    <main>
+  
+        <form id="roll_form" autocomplete="off">
+            <!-- action="/gamedb/rollgame" method="POST" -->
             
             <div>
                 <label>Number of players</label>
-                <input name="player_num" type="number" required>
+                <input name="player_num" type="number" required value="1">
             </div>
             <div>
                 <label>Duration between </label>
-                <input name="duration_min" required>
+                <input name="duration_min" required value="2">
                 <label>and</label>
-                <input name="duration_max" required>
+                <input name="duration_max" required value="3">
                 <label>minutes</label>
             </div>
             <div>
                 <label>Minimal age</label>
-                <input name="player_age_min" required>
+                <input name="player_age_min" required value="4">
             </div>
 
-            <button type="submit">Select game!</button>
+            <button>Select game!</button>
         </form>
+
+        
+    </main>
+
+    <script src="/scripts/app.js"></script>
 
     </body>
 </html>
