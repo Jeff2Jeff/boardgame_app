@@ -6,33 +6,42 @@
     <body>
 
     <main>
-  
+        
+
         <form id="roll_form" autocomplete="off">
             <!-- action="/gamedb/rollgame" method="POST" -->
             
             <div>
                 <label>Number of players</label>
-                <input name="player_num" type="number" required value="1">
+                <input name="player_num" type="number" required value="3">
             </div>
             <div>
-                <label>Duration between </label>
-                <input name="duration_min" required value="2">
-                <label>and</label>
-                <input name="duration_max" required value="3">
-                <label>minutes</label>
+                <label>Duration (minutes)</label>
+                <!--<input name="duration_min" required value="2">
+                <label>and</label>-->
+                <input name="duration_max" type="number" required value="10">
             </div>
             <div>
-                <label>Minimal age</label>
-                <input name="player_age_min" required value="4">
+                <label>Minimum age</label>
+                <input name="player_age_min" type="number" required value="10">
             </div>
 
             <button>Select game!</button>
         </form>
 
+        <div id="roll_overlay" class="mainscreenoverlay">
+            
+
+        </div>>
         
     </main>
 
+    <script src="/scripts/pouchdb-7.1.1.js"></script>
+    <script src="/scripts/pouchdb.find.js"></script>
     <script src="/scripts/app.js"></script>
+    <script src="/scripts/gamedb_local.js"></script>
+
+    
 
     </body>
 </html>
