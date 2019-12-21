@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-
+        <link rel="stylesheet" type="text/css" href="./styles/boardgame_style.css">
     </head>
     <body>
 
@@ -26,18 +26,40 @@
                 <input name="player_age_min" type="number" required value="10">
             </div>
 
-            <button>Select game!</button>
+            <button type="submit">Select game!</button>
         </form>
 
-        <div id="roll_overlay" class="mainscreenoverlay">
-            
-
-        </div>>
+        <div id="roll_overlay" class="mainscreen_overlay" hidden>
+            <div id="roll_animation_panel" hidden>
+                <img src="./images/dice_fall.gif">
+                Looking for game!
+            </div>
+            <div id="roll_result_panel" hidden>
+                <div>
+                    Picked
+                    <span id="roll_result_title">-</span>
+                    out of 
+                    <span id="roll_result_length">-</span>
+                    games
+                </div>
+                <button id="button_play">Awesome, we'll play it!</button>
+                <button id="button_reroll">Nah, pick another one please</button>
+                <button id="button_updatefilters">Wait, let me change the filters</button>
+            </div>
+            <div id="roll_nogame_panel" hidden>
+                No games were found! :(
+                <button id="button_closenogame">Ok, I'll try something else!</button>
+            </div>
+        </div>
         
     </main>
 
+    <!-- libraries -->
+    <script src="/scripts/jquery-3.4.1.js"></script>
     <script src="/scripts/pouchdb-7.1.1.js"></script>
     <script src="/scripts/pouchdb.find.js"></script>
+    
+    <!-- app code -->
     <script src="/scripts/app.js"></script>
     <script src="/scripts/gamedb_local.js"></script>
 
