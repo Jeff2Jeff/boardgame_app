@@ -1,0 +1,63 @@
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+body {
+    background-color: #ffbbff;
+}
+
+/* styling for general overlays of app */
+.mainscreen_overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    
+    background-color: rgba(0,0,0, 0.5);
+    color: #ffffff;
+
+    padding: 20px;
+}
+
+.mainscreen_overlay > div {
+    display: none;
+    background-color: #444444;
+}
+
+/* styling for the game rolling panels */
+.game_roll_panel {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    padding: 10px;
+    
+    text-align: center;
+}
+
+/* styling for the animation panel elements */
+.game_roll_panel img {
+    display: block;
+    max-width: 80%;
+    max-height: 80%;
+    width: auto;
+    height: auto;
+    margin: auto;
+    margin-top: 5px;
+}
+
+.game_roll_panel button {
+    display: block;
+    width: 80%;
+    margin: auto;
+    margin-top: 5px;
+    padding: 5px;
+
+}

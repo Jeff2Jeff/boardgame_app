@@ -52,21 +52,24 @@ function roll_for_game() {
         // if any results were found, continue to pick one
         if(game_pick_list.length > 0) {
             
-            gamelist_length = game_pick_list.length;
-            selected_index = randomIntFromInterval(0, gamelist_length - 1);
+            gamelist_length_initial = game_pick_list.length;
+            selected_index = randomIntFromInterval(0, gamelist_length_initial - 1);
             //selected_game = game_pick_list[selected_index];
             
             // update list of selected games so that the currently roled on isn't in it anymore
             selected_game = game_pick_list.splice(selected_index, 1)[0]
             
             // some logging
-            console.log(gamelist_length, selected_index, selected_game['title'])
+            console.log(gamelist_length_initial, selected_index, selected_game['title'])
             
             // show the result on screen
             $('#roll_result_title').html('"' + selected_game['title'] + '"')
-            $('#roll_result_length').html(gamelist_length)
+            $('#roll_result_length').html(gamelist_length_initial)
             $('#roll_result_panel').show()
-            
+
+            // disable the reroll button if there's only one game left
+            $('#button_reroll').attr("disabled", gamelist_length_initial == 1);
+
         } else {
 
             console.log("No games were found")
@@ -75,7 +78,7 @@ function roll_for_game() {
             $('#roll_nogame_panel').show()
             
         }
-    }, 1000);
+    }, 2000);
 }
 
 /**
@@ -102,6 +105,7 @@ $(document).ready(function(){
     // accept suggestion and play the game
     // TODO: track recently played games to exclude from reroll
     $('#button_play').on('click',close_results);
+    
     
 });
 

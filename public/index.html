@@ -7,34 +7,14 @@
 
     <main>
         
-
-        <form id="roll_form" autocomplete="off">
-            <!-- action="/gamedb/rollgame" method="POST" -->
-            
-            <div>
-                <label>Number of players</label>
-                <input name="player_num" type="number" required value="3">
+        <div id="roll_overlay" class="mainscreen_overlay">
+            <div id="roll_animation_panel" class="game_roll_panel">
+                <div>
+                    Selecting game...
+                    <img src="./images/dice_fall.gif">
+                </div>
             </div>
-            <div>
-                <label>Duration (minutes)</label>
-                <!--<input name="duration_min" required value="2">
-                <label>and</label>-->
-                <input name="duration_max" type="number" required value="10">
-            </div>
-            <div>
-                <label>Minimum age</label>
-                <input name="player_age_min" type="number" required value="10">
-            </div>
-
-            <button type="submit">Select game!</button>
-        </form>
-
-        <div id="roll_overlay" class="mainscreen_overlay" hidden>
-            <div id="roll_animation_panel" hidden>
-                <img src="./images/dice_fall.gif">
-                Looking for game!
-            </div>
-            <div id="roll_result_panel" hidden>
+            <div id="roll_result_panel" class="game_roll_panel">
                 <div>
                     Picked
                     <span id="roll_result_title">-</span>
@@ -46,10 +26,29 @@
                 <button id="button_reroll">Nah, pick another one please</button>
                 <button id="button_updatefilters">Wait, let me change the filters</button>
             </div>
-            <div id="roll_nogame_panel" hidden>
-                No games were found! :(
-                <button id="button_closenogame">Ok, I'll try something else!</button>
+            <div id="roll_nogame_panel" class="game_roll_panel">
+                <div>
+                    No games were found! :(
+                    <img src="./images/empty_box.jpg">
+                </div>
+                
+                <div><button id="button_closenogame">Ok, I'll try something else!</button></div>
             </div>
+        </div>
+        
+        <div class="game_roll_panel">
+            <form id="roll_form" autocomplete="off">
+                <!-- action="/gamedb/rollgame" method="POST" -->
+                
+                <div>Number of players</div>
+                <div><input name="player_num" type="number" required value="3"></div>
+                <div>Duration (minutes)</div>
+                <div><input name="duration_max" type="number" required value="10"></div>
+                <div>Minimum age</div>
+                <div><input name="player_age_min" type="number" required value="10"></div>
+
+                <button type="submit">Select game!</button>
+            </form>
         </div>
         
     </main>
