@@ -1,3 +1,5 @@
+'use strict';
+
 // TODO: setup generic logging (dev vs production?)
 // TODO: add error handling
 
@@ -62,12 +64,12 @@ function roll_for_game() {
         // if any results were found, continue to pick one
         if(game_pick_list.length > 0) {
             
-            gamelist_length_initial = game_pick_list.length;
-            selected_index = randomIntFromInterval(0, gamelist_length_initial - 1);
+            var gamelist_length_initial = game_pick_list.length;
+            var selected_index = randomIntFromInterval(0, gamelist_length_initial - 1);
             //selected_game = game_pick_list[selected_index];
             
             // update list of selected games so that the currently roled on isn't in it anymore
-            selected_game = game_pick_list.splice(selected_index, 1)[0]
+            var selected_game = game_pick_list.splice(selected_index, 1)[0]
             
             // some logging
             console.log(game_pick_list)
@@ -108,7 +110,7 @@ function close_results() {
  */
 function navigate_to(event) {
 
-    newpage_id = event.data['page_id'];
+    var newpage_id = event.data['page_id'];
 
     // TODO: some animation
 
@@ -163,7 +165,7 @@ function generate_all_cards() {
         function(game_list_full) {
 
             game_list_full.forEach(game_doc => {
-                new_card = generate_game_card(game_doc);
+                var new_card = generate_game_card(game_doc);
                 new_card.show();
                 $('#game_card_list').append(new_card);
             });

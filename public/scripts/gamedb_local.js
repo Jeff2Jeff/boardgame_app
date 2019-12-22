@@ -1,6 +1,6 @@
+'use strict';
+
 const local_game_db = new PouchDB('gamedb_local');
-
-
 
 
 /**
@@ -68,18 +68,18 @@ function find_games(in_numplayers, in_duration, in_minage) {
             }
         }).then(function (result) {
             
-            tmp_results = []
+            var tmp_results = [];
 
             Promise.all(result.docs.map(function(doc) {
                 tmp_results.push(doc);
             })).then(function(eh){
-                resolve(tmp_results)
+                resolve(tmp_results);
             });
             
         }).catch(function(){
             //console.log.bind(console)
-            console.log('db lookup error')
-            reject("Gamedb lookup error?")
+            console.log('db lookup error');
+            reject("Gamedb lookup error?");
         });
     });
 }
@@ -102,7 +102,7 @@ function get_all_games() {
             })
         }).then(function (result) {
             
-            tmp_results = []
+            var tmp_results = []
 
             Promise.all(result.docs.map(function(doc) {
                 tmp_results.push(doc);
