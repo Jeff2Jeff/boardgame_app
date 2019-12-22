@@ -36,7 +36,7 @@ function add_game(
     // TODO: use promises? Am I here?
     local_game_db.post(newgame, function callback(err, result) {
         if (!err) {
-            console.log('Succesfully added game: ' + in_title);
+            //console.log('Succesfully added game: ' + in_title);
         } else {
             console.log(err)
         }
@@ -82,9 +82,42 @@ function find_games(in_numplayers, in_duration, in_minage) {
             reject("Gamedb lookup error?")
         });
     });
-
-      
 }
+
+
+function get_all_games() {
+
+    // find games that match the limits set in parameters
+    return new Promise( function(resolve,reject){
+
+        local_game_db.createIndex({
+            index: {fields: ['title']}
+        }).then(function(){
+
+            return local_game_db.find({
+                selector: {
+                    title: {$exists: true}
+                },
+                sort: ['title']
+            })
+        }).then(function (result) {
+            
+            tmp_results = []
+
+            Promise.all(result.docs.map(function(doc) {
+                tmp_results.push(doc);
+            })).then(function(eh){
+                resolve(tmp_results)
+            });
+            
+        }).catch(function(error){
+            //console.log.bind(console)
+            console.log('db lookup error',error)
+            reject("Gamedb lookup error?")
+        });
+    });
+}
+
 
 /**
  * Function to populate dev database locally
@@ -97,7 +130,7 @@ function init_localdb_dev() {
     local_game_db.allDocs().then(function (result) {
         // Promise isn't supported by all browsers; you may want to use bluebird
         return Promise.all(result.rows.map(function (row) {
-          return local_game_db.remove(row.id, row.value.rev);
+          return local_game_db.remove(row.id);
         }));
     }).then(function () {
         // done!
@@ -123,7 +156,7 @@ function init_localdb_dev() {
         add_game(198773,"Codenames Pictures",2,8,10,15,15)
         add_game(8946,"Da vinci code",2,4,8,15,15)
         add_game(41114,"De Mol",5,10,13,30,30)
-        add_game(3321,"de Piramides van de Jaguar",2,2,10,45,45)
+        add_game(3321,"De Piramides van de Jaguar",2,2,10,45,45)
         add_game(1219,"Doolhof",2,4,8,20,20)
         add_game(10,"Elfenland",2,6,10,60,60)
         add_game(83197,"Fifty Fifty",3,5,8,30,30)
@@ -179,7 +212,7 @@ function init_localdb_dev() {
     // error!
     });
 
-
+    console.log("Done init db")
 }
 
 init_localdb_dev()

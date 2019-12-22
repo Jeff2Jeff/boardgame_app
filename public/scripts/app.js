@@ -1,16 +1,24 @@
+// TODO: setup generic logging (dev vs production?)
+// TODO: add error handling
+
 // this is a global variable that's adjusted based on user input
 var game_pick_list = [];
+var active_page_id = '';
 
+/**
+ * Start up a new game roll 'session'
+ * Local DB interaction goes here
+ */
 function get_game_list(e) {
     
     // prevent default form (redirectish) behavior
     if (e.preventDefault) e.preventDefault();
 
     // find the value field in the forms
-    tmp_form_inputs = e.target.getElementsByTagName('input');
-    player_num = parseInt(tmp_form_inputs['player_num'].value);
-    player_age_min = parseInt(tmp_form_inputs['player_age_min'].value);
-    duration_max = parseInt(tmp_form_inputs['duration_max'].value);
+    var tmp_form_inputs = e.target.getElementsByTagName('input');
+    var player_num = parseInt(tmp_form_inputs['player_num'].value);
+    var player_age_min = parseInt(tmp_form_inputs['player_age_min'].value);
+    var duration_max = parseInt(tmp_form_inputs['duration_max'].value);
     
     // TODO: check values integrity? (Note: should also already be done by form...)
 
@@ -32,13 +40,15 @@ function get_game_list(e) {
     return false;
 }
 
-
+/**
+ * App interactions for selecting a game: will transition between 
+ * screens and update the 'shortlist' of games based on user actions.
+ */
 function roll_for_game() {
-
-    // TODO: CSS update to make this code block the form
 
     // show generic overlay that disables the form
     $('#roll_overlay').show();
+    
     // show game_roll spinner and hide every of the other outcomes
     $('#roll_animation_panel').show();
     $('#roll_result_panel').hide();
@@ -93,7 +103,91 @@ function close_results() {
     $('#roll_nogame_panel').hide()
 }
 
-$(document).ready(function(){
+/**
+ * Navigate to different page in the app
+ */
+function navigate_to(event) {
+
+    newpage_id = event.data['page_id'];
+
+    // TODO: some animation
+
+    // Hide currently active page
+    if($(active_page_id)) {
+        $(active_page_id).hide();
+    }
+
+    // show new page and store reference
+    if($(newpage_id)) {
+        $(newpage_id).show();
+        active_page_id = newpage_id;
+    }
+}
+
+/**
+ * Generate a new html element representing the game, 
+ * based on a provide document (PouchDB)
+ *
+ * HTML element will be provided based on the template
+ * 
+ * @param {*} game_doc
+ */
+function generate_game_card(game_doc)
+{
+    // get a copy of the template, clone it and update the id
+    var tmp = $('#game_record_template').clone()
+    tmp.attr('id','card_' + game_doc['_id'])
+    
+    // set contents of the card
+    tmp.find('#game_title').html(game_doc['title'])
+    tmp.find('#game_time_min').html(game_doc['duration_min'])
+    tmp.find('#game_time_max').html(game_doc['duration_max'])
+    tmp.find('#game_players_min').html(game_doc['players_min'])
+    tmp.find('#game_players_max').html(game_doc['players_max'])
+    tmp.find('#game_age_min').html(game_doc['players_age'])
+
+    return tmp;
+}
+
+
+/**
+ * Generate list of cards for all games in the local database
+ */
+function generate_all_cards() {
+
+    // TODO: show loading screen
+
+    $('#game_card_list').html('');
+
+    get_all_games().then(
+        function(game_list_full) {
+
+            game_list_full.forEach(game_doc => {
+                new_card = generate_game_card(game_doc);
+                new_card.show();
+                $('#game_card_list').append(new_card);
+            });
+
+    }).catch(function(error){
+        console.log('DB lookup error', error);
+    });
+}
+
+
+
+
+/** 
+ * All things that happen after document loads go here.
+ */
+$(document).ready(function() {
+
+    /** menu stuff */
+
+    // menu navigation functions
+    $('#app_menu_roll').on('click',{page_id: '#game_selection'},navigate_to);
+    $('#app_menu_games').on('click',{page_id: '#game_management'},navigate_to);
+
+    /** gameroll stuff  */
 
     // form submitted to roll for a game
      $("#roll_form").submit(get_game_list);
@@ -103,12 +197,18 @@ $(document).ready(function(){
     // close all results and get access to the form again
     $('#button_updatefilters').on('click',close_results);
     $('#button_closenogame').on('click',close_results);
-    
+
     // accept suggestion and play the game
     // TODO: track recently played games to exclude from reroll
     $('#button_play').on('click',close_results);
-    
-    
+
+    /** game management stuff */
+    $('#game_record_template').hide()
+
+    // initial page of the app
+    $('#app_menu_games').trigger('click');
+
+    generate_all_cards();
 });
 
 /**
