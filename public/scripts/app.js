@@ -60,8 +60,10 @@ function roll_for_game() {
             selected_game = game_pick_list.splice(selected_index, 1)[0]
             
             // some logging
+            console.log(game_pick_list)
+            console.log(selected_game)
             console.log(gamelist_length_initial, selected_index, selected_game['title'])
-            
+
             // show the result on screen
             $('#roll_result_title').html('"' + selected_game['title'] + '"')
             $('#roll_result_length').html(gamelist_length_initial)

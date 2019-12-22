@@ -132,7 +132,7 @@ function init_localdb_dev() {
         add_game(2944,"Halli Galli",2,6,6,10,10)
         add_game(17520,"Het verboden spel",2,12,9,10,10)
         add_game(69205,"High Five",2,4,8,30,30)
-        add_game(34096,"Hotel",2,4,0,5,5)
+        add_game(1502,"Hotel",2,4,8,60,60)
         add_game(1117,"Koehandel",3,5,10,45,45)
         add_game(56786,"Koehandel Master",2,6,10,60,60)
         add_game(533,"Labyrinthe het kaartspel",2,6,7,30,30)
@@ -167,6 +167,7 @@ function init_localdb_dev() {
         add_game(25821,"Weerwolven",8,18,10,30,30)
         add_game(28037,"Wollie Bollie",2,6,10,30,30)
         add_game(39192,"Zwart kater",2,9,4,10,10)
+        add_game(-1,"XCOM",1,4,16,240,360)
     
         local_game_db.createIndex({
             index: {fields: ['players_min','players_max','players_age'
