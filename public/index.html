@@ -40,16 +40,96 @@
                 </div>
             </div>
 
+            <div id="add_game_overlay" class="mainscreen_overlay">
+
+                <div id="add_game_screen">
+                    <button id="add_game_close">Close</button>
+                    <button id="add_game_searchbgg">Search BGG</button>
+
+                    <form id="add_game_form" autocomplete="off">
+
+                        <!-- TODO: upload custom image-->
+                        <div>Title:<input id="newgame_title" required></div>
+                        <div><img id=newgame_image src="/images/game_box_missing.jpg"></div>
+                        <div>Players (min):<input id="newgame_players_min" type="number" required></div>
+                        <div>Players (max):<input id="newgame_players_max" type="number"  required></div>
+                        <div>Duration (min):<input id="newgame_duration_min" type="number"  required></div>
+                        <div>Duration (max):<input id="newgame_duration_max" type="number"  required></div>
+                        <div>Players (age):<input id="newgame_players_age" type="number"  required></div>
+
+                        <div>
+                            <button type="submit">Add game</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="screen_search_bgg">
+                    <form id="search_game_form" autocomplete="off">
+                        <div><input name="seach_term" required value="regenwormen junior"></div>
+                        <div><button type="submit">Search</button></div>
+                    </form>
+
+                    <div id="search_game_results"></div>
+
+                    <button id="search_game_close">Close</button>
+                </div>
+
+                <div id="screen_bgg_details">
+
+                    <div id="bgg_details_game">
+                        <div id="bgg_details_title">?</div>
+                        
+                        <div>
+                            <div>
+                                <img id="bgg_details_cover" src="/images/game_box_missing.jpg">
+                            </div>
+                            <div>
+                                <div>
+                                    <span>Players:</span>
+                                    <span id="bgg_details_players_min">?</span>
+                                    -
+                                    <span id="bgg_details_players_max">?</span>
+                                    (<span id="bgg_details_age_min">?</span>+)
+                                </div>
+                                <div>
+                                    <span>Time:</span>
+                                    <span id="bgg_details_time_min">?</span>
+                                    -
+                                    <span id="bgg_details_time_max">?</span>
+                                    min
+                                </div>
+                            </div>
+                            <div>
+                                <button id="bgg_details_select">Select</button>
+                                <button id="bgg_details_close">Close</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div>Available names:</div>
+                    <div id="bgg_details_altnames"></div>
+                    <div>Available versions:</div>
+                    <div id="bgg_details_versions"></div>
+                    
+                    
+
+                </div>
+                
+            </div>
+
+
+
             <div id="app_menu">
                 <a id="app_menu_roll">Roll!</a>
                 <a id="app_menu_games">Games</a>
+                <a id="add_game">+</a>
             </div>
 
             <div id="game_selection" class="mainscreen">
 
                 <div class="game_roll_panel">
                     <form id="roll_form" autocomplete="off">
-                        <!-- action="/gamedb/rollgame" method="POST" -->
                         
                         <div>Number of players</div>
                         <div><input name="player_num" type="number" required value="3"></div>
@@ -102,9 +182,11 @@
         <script src="/scripts/pouchdb.find.js"></script>
         
         <!-- app code -->
-        <script src="/scripts/app.js"></script>
+        <script src="/scripts/game_object.js"></script>
         <script src="/scripts/bgg_info.js"></script>
         <script src="/scripts/gamedb_local.js"></script>
+        <script src="/scripts/app.js"></script>
+
 
     
 

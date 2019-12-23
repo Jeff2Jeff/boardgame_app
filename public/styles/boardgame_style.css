@@ -16,9 +16,9 @@ body {
 }
 
 main {
-    display: flex;
     flex-flow: column;
     height: 100%;
+    display: flex;
 }
 
 /* styling for the main app pages */
@@ -78,6 +78,7 @@ main {
 
 /* Styling for the menu */
 #app_menu {
+    background-color: navy;
     flex: 0 0 40px;
 }
 
@@ -95,6 +96,9 @@ main {
 }
 
 /* Styling for game management pages */
+
+
+/* Styling for game management record cards */
 .game_record {
     margin: 5px;
     padding: 10px;
@@ -127,4 +131,15 @@ main {
 
 .game_card_label{
     font-weight: bold;
+}
+
+/* bgg details styles */
+.details_screen_selected {
+    display: block;
+    background-color: palegreen;
+}
+
+.details_screen_notselected {
+    display: block;
+    background-color: peru;
 }

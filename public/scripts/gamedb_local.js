@@ -18,8 +18,10 @@ function add_game(
             in_bgg_id, in_title
             , in_players_min, in_players_max, in_players_age
             , in_time_min, in_time_max
+            , in_imageblob = null
             )
 {
+
     var newgame = {
         //_id: new Date().toISOString(),
         id_bgg: in_bgg_id
@@ -29,18 +31,37 @@ function add_game(
         , players_age: in_players_age
         , duration_min: in_time_min
         , duration_max: in_time_max
+        , cover_image_blob: in_imageblob
     };
+
+    
+    // var catImage = document.getElementById('cat');
+    // convertImgToBlob(catImage, function (blob) {
+    //   db.putAttachment('meowth', 'meowth.png', blob, 'image/png').then(function () {
+    //     return db.get('meowth', {attachments: true});
+    //   }).then(function (doc) {
+    //     console.log(doc);
+    //   });
+    // });
 
     // insert data into local game database
     // TODO: put vs post? should I generate _id myself?
     // TODO: use promises? Am I here?
-    local_game_db.post(newgame, function callback(err, result) {
-        if (!err) {
-            //console.log('Succesfully added game: ' + in_title);
-        } else {
-            console.log(err)
-        }
-    });
+    // local_game_db.post(newgame, function callback(err, result) {
+    //     if (!err) {
+    //         //console.log('Succesfully added game: ' + in_title);
+    //     } else {
+    //         console.log(err)
+    //     }
+    // });
+
+    local_game_db.post(newgame).then(function(response) {
+        
+        console.log(response);
+
+    }).catch(function(error){
+        console.log(error);
+    })    
 }
 
 /**
