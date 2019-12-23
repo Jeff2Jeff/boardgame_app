@@ -83,10 +83,15 @@ function roll_for_game() {
             console.log(selected_game)
             console.log(gamelist_length_initial, selected_index, selected_game['title'])
 
+            var image_url = selected_game['remote_image_url'];
+            image_url = (image_url !== undefined & image_url.length > 0) ?
+                                image_url : MISSING_COVER_IMAGE;
+
             // show the result on screen
-            $('#roll_result_title').html('"' + selected_game['title'] + '"')
-            $('#roll_result_length').html(gamelist_length_initial)
-            $('#roll_result_panel').show()
+            $('#roll_result_title').html('"' + selected_game['title'] + '"');
+            $('#roll_result_img').attr('src',image_url);
+            $('#roll_result_length').html(gamelist_length_initial);
+            $('#roll_result_panel').show();
 
             // disable the reroll button if there's only one game left
             $('#button_reroll').attr("disabled", gamelist_length_initial == 1);
@@ -178,10 +183,11 @@ function generate_all_cards() {
 
     // TODO: show loading screen
 
-    $('#game_card_list').html('');
 
     get_all_games().then(
         function(game_list_full) {
+
+            $('#game_card_list').html('');
 
             game_list_full.forEach(game_doc => {
                 var new_card = generate_game_card(game_doc);
