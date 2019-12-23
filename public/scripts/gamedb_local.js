@@ -26,11 +26,11 @@ function add_game(
         //_id: new Date().toISOString(),
         id_bgg: in_bgg_id
         , title: in_title
-        , players_min: in_players_min
-        , players_max: in_players_max
-        , players_age: in_players_age
-        , duration_min: in_time_min
-        , duration_max: in_time_max
+        , players_min: parseInt(in_players_min)
+        , players_max: parseInt(in_players_max)
+        , players_age: parseInt(in_players_age)
+        , duration_min: parseInt(in_time_min)
+        , duration_max: parseInt(in_time_max)
         , remote_image_url: in_imageurl
     };
 

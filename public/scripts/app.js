@@ -119,6 +119,9 @@ function navigate_to(event) {
 
     var newpage_id = event.data['page_id'];
 
+    // TODO: move to appropriate place
+    generate_all_cards();
+
     // TODO: some animation
 
     // Hide currently active page
@@ -201,13 +204,13 @@ function open_game_popup(event) {
     // clear the form when the page first opens
     // TODO: why doesn't reset work?
     //$("#add_game_form")[0].reset();
-    $("#newgame_title").attr('value','');
-    $("#newgame_image").attr('src',MISSING_COVER_IMAGE);
-    $("#newgame_players_min").attr('value','');
-    $("#newgame_players_max").attr('value','');
-    $("#newgame_duration_min").attr('value','');
-    $("#newgame_duration_max").attr('value','');
-    $("#newgame_players_age").attr('value','');
+    $('#newgame_title').val('');
+    $('#newgame_image').attr('src',MISSING_COVER_IMAGE);
+    $('#newgame_players_min').val('');
+    $('#newgame_players_max').val('');
+    $('#newgame_duration_min').val('');
+    $('#newgame_duration_max').val('');
+    $('#newgame_players_age').val('');
 }
 
 function close_game_popup(event) {
@@ -228,12 +231,12 @@ function add_game_to_lib(e) {
     
     add_game(
         -1,
-        $('#newgame_title').attr('value'),
-        $('#newgame_players_min').attr('value'),
-        $('#newgame_players_max').attr('value'),
-        $('#newgame_players_age').attr('value'),
-        $('#newgame_duration_min').attr('value'),
-        $('#newgame_duration_max').attr('value'),
+        $('#newgame_title').val(),
+        $('#newgame_players_min').val(),
+        $('#newgame_players_max').val(),
+        $('#newgame_players_age').val(),
+        $('#newgame_duration_min').val(),
+        $('#newgame_duration_max').val(),
         image_url
     );
 
@@ -248,7 +251,7 @@ function open_search_bgg() {
     $('#add_game_screen').hide()
 
     // reset search form;
-    $('#search_term').attr('value','');
+    $('#search_term').val('');
 
     $('#screen_search_bgg').show()
 }
@@ -272,7 +275,7 @@ function form_search_bgg(e) {
     // TODO: show search spinner
 
     //var tmp_form_inputs = e.target.getElementsByTagName('input');
-    var search_term = $('#search_term').attr('value');
+    var search_term = $('#search_term').val();
     
     search_bgg(search_term).then(function(search_result_list) {
 
@@ -431,13 +434,13 @@ function select_details_bgg(event) {
                         image_url : '/images/game_box_missing.jpg'
 
     // fill the details into the 'add game' screen
-    $('#newgame_title').attr('value',bgg_details_game['selected_altname']);
+    $('#newgame_title').val(bgg_details_game['selected_altname']);
     $('#newgame_image').attr('src',image_url);
-    $('#newgame_players_min').attr('value',bgg_details_game['players_min']);
-    $('#newgame_players_max').attr('value',bgg_details_game['players_max']);
-    $('#newgame_players_age').attr('value',bgg_details_game['players_age']);
-    $('#newgame_duration_min').attr('value',bgg_details_game['duration_min']);
-    $('#newgame_duration_max').attr('value',bgg_details_game['duration_max']);
+    $('#newgame_players_min').val(bgg_details_game['players_min']);
+    $('#newgame_players_max').val(bgg_details_game['players_max']);
+    $('#newgame_players_age').val(bgg_details_game['players_age']);
+    $('#newgame_duration_min').val(bgg_details_game['duration_min']);
+    $('#newgame_duration_max').val(bgg_details_game['duration_max']);
     
     // TODO: track bgg_id
 
