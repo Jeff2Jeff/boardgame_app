@@ -70,16 +70,16 @@ function get_bgg_data(bgg_id) {
             
             // image stuff
             response_struct['image_url'] = main_game_xml.find('thumbnail').first().text();
-            response_struct['image_blob'] = convertImgToBlob(response_struct['image_url']);
+//            response_struct['image_blob'] = convertImgToBlob(response_struct['image_url']);
             
-            convertImgToBlob(response_struct['image_url']).then(function(blob) {
+            // convertImgToBlob(response_struct['image_url']).then(function(blob) {
                 
-                // store blob in struct
-                response_struct['image_blob'] = blob;
+            //     // store blob in struct
+            //     response_struct['image_blob'] = blob;
 
-            }, function(err) {
-                console.log(err)
-            });
+            // }, function(err) {
+            //     console.log(err)
+            // });
             
             resolve(response_struct);
             
@@ -90,27 +90,6 @@ function get_bgg_data(bgg_id) {
             console.log(error);
         });
     });
-}
-
-
-function convertImgToBlob(img_url, callback) {
-
-    var img = document.createElement('img');
-    img.src = img_url;
-
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-    context.drawImage(img, 0, 0);
-
-    // Warning: toBlob() isn't supported by every browser.
-    // You may want to use blob-util.
-    canvas.toBlob(function(blob){return blob;}, 'image/png');
-
-    return new Promise(function(resolve, reject) {
-        canvas.toBlob(function(blob) {
-            resolve(blob)
-        })
-    })
 }
 
 function search_bgg(search_term) {

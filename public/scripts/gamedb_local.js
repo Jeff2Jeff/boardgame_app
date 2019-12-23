@@ -18,7 +18,7 @@ function add_game(
             in_bgg_id, in_title
             , in_players_min, in_players_max, in_players_age
             , in_time_min, in_time_max
-            , in_imageblob = null
+            , in_imageurl = null
             )
 {
 
@@ -31,33 +31,13 @@ function add_game(
         , players_age: in_players_age
         , duration_min: in_time_min
         , duration_max: in_time_max
-        , cover_image_blob: in_imageblob
+        , remote_image_url: in_imageurl
     };
 
-    
-    // var catImage = document.getElementById('cat');
-    // convertImgToBlob(catImage, function (blob) {
-    //   db.putAttachment('meowth', 'meowth.png', blob, 'image/png').then(function () {
-    //     return db.get('meowth', {attachments: true});
-    //   }).then(function (doc) {
-    //     console.log(doc);
-    //   });
-    // });
-
-    // insert data into local game database
-    // TODO: put vs post? should I generate _id myself?
-    // TODO: use promises? Am I here?
-    // local_game_db.post(newgame, function callback(err, result) {
-    //     if (!err) {
-    //         //console.log('Succesfully added game: ' + in_title);
-    //     } else {
-    //         console.log(err)
-    //     }
-    // });
 
     local_game_db.post(newgame).then(function(response) {
         
-        console.log(response);
+        //resolve(response);
 
     }).catch(function(error){
         console.log(error);
@@ -119,6 +99,7 @@ function get_all_games() {
                 selector: {
                     title: {$exists: true}
                 },
+                attachments: true,
                 sort: ['title']
             })
         }).then(function (result) {
@@ -151,8 +132,12 @@ function init_localdb_dev() {
     local_game_db.allDocs().then(function (result) {
         // Promise isn't supported by all browsers; you may want to use bluebird
         return Promise.all(result.rows.map(function (row) {
-          return local_game_db.remove(row.id);
+            
+            console.log(row.id);
+            local_game_db.remove(row.id);
+            
         }));
+        
     }).then(function () {
         // done!
         add_game(25213,"30 Seconds ",3,24,12,30,30)
@@ -223,17 +208,18 @@ function init_localdb_dev() {
         add_game(39192,"Zwart kater",2,9,4,10,10)
         add_game(-1,"XCOM",1,4,16,240,360)
     
-        local_game_db.createIndex({
-            index: {fields: ['players_min','players_max','players_age'
-            ,'duration_max','title']}
-            //,'duration_min'
-        });
+        // local_game_db.createIndex({
+        //     index: {fields: ['players_min','players_max','players_age'
+        //     ,'duration_max','title']}
+        //     //,'duration_min'
+        // });
 
     }).catch(function (err) {
     // error!
+        console.log(err);
     });
 
     console.log("Done init db")
 }
 
-init_localdb_dev()
+//init_localdb_dev()

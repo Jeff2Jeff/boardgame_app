@@ -143,9 +143,18 @@ function navigate_to(event) {
  */
 function generate_game_card(game_doc)
 {
+    //console.log(game_doc);
+
     // get a copy of the template, clone it and update the id
     var tmp = $('#game_record_template').clone()
-    tmp.attr('id','card_' + game_doc['_id'])
+    tmp.attr('id','card_' + game_doc['id'])
+
+    // get remote image url, or show missing cover image
+    var image_url = game_doc['remote_image_url'];
+    image_url = (image_url !== undefined & image_url.length > 0) ?
+                        image_url : MISSING_COVER_IMAGE;
+
+    tmp.find('#game_cover').attr('src',image_url);
     
     // set contents of the card
     tmp.find('#game_title').html(game_doc['title'])
@@ -188,9 +197,17 @@ function open_game_popup(event) {
     // show the overlay and screen
     $('#add_game_overlay').show();
     $('#add_game_screen').show();
-
+    
     // clear the form when the page first opens
-    $("#add_game_form")[0].reset();
+    // TODO: why doesn't reset work?
+    //$("#add_game_form")[0].reset();
+    $("#newgame_title").attr('value','');
+    $("#newgame_image").attr('src',MISSING_COVER_IMAGE);
+    $("#newgame_players_min").attr('value','');
+    $("#newgame_players_max").attr('value','');
+    $("#newgame_duration_min").attr('value','');
+    $("#newgame_duration_max").attr('value','');
+    $("#newgame_players_age").attr('value','');
 }
 
 function close_game_popup(event) {
@@ -209,22 +226,16 @@ function add_game_to_lib(e) {
         image_url = "";
     }
     
-    convertImgToBlob(image_url).then(function(img_blob) {
-
-        add_game(
-            -1,
-            $('#newgame_title').attr('value'),
-            $('#newgame_players_min').attr('value'),
-            $('#newgame_players_max').attr('value'),
-            $('#newgame_players_age').attr('value'),
-            $('#newgame_duration_min').attr('value'),
-            $('#newgame_duration_max').attr('value'),
-            img_blob
-        )
-
-    }, function(err) {
-        console.log(err)
-    });
+    add_game(
+        -1,
+        $('#newgame_title').attr('value'),
+        $('#newgame_players_min').attr('value'),
+        $('#newgame_players_max').attr('value'),
+        $('#newgame_players_age').attr('value'),
+        $('#newgame_duration_min').attr('value'),
+        $('#newgame_duration_max').attr('value'),
+        image_url
+    );
 
     generate_all_cards();
     close_game_popup();
@@ -235,6 +246,10 @@ function add_game_to_lib(e) {
 function open_search_bgg() {
 
     $('#add_game_screen').hide()
+
+    // reset search form;
+    $('#search_term').attr('value','');
+
     $('#screen_search_bgg').show()
 }
 
@@ -256,8 +271,8 @@ function form_search_bgg(e) {
 
     // TODO: show search spinner
 
-    var tmp_form_inputs = e.target.getElementsByTagName('input');
-    var search_term = tmp_form_inputs['seach_term'].value;
+    //var tmp_form_inputs = e.target.getElementsByTagName('input');
+    var search_term = $('#search_term').attr('value');
     
     search_bgg(search_term).then(function(search_result_list) {
 
