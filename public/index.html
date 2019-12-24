@@ -149,33 +149,40 @@
 
                 </div>
 
-                <div id="game_record_template" class="game_record">
-                    <div id="game_title" class="game_record_title">?</div>
-                    <div class="game_record_info">
-                        <img id="game_cover" src="/images/game_box_missing.jpg">
-                        <div>
-                            <div>
-                                <span class="game_card_label">Players:</span>
-                                <span id="game_players_min">?</span>
-                                -
-                                <span id="game_players_max">?</span>
-                                (<span id="game_age_min">?</span>+)
-                            </div>
-                            <div>
-                                <span class="game_card_label">Time:</span>
-                                <span id="game_time_min">?</span>
-                                -
-                                <span id="game_time_max">?</span>
-                                min
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
 
 
             
         </main>
+
+        <!-- templates for app -->
+        <template>
+
+            <!-- template for game record in management screen -->
+            <div id="game_record_template" class="game_record">
+                <div id="game_title" class="game_record_title">?</div>
+                <div class="game_record_info">
+                    <img id="game_cover" src="/images/game_box_missing.jpg">
+                    <div>
+                        <div>
+                            <span class="game_card_label">Players:</span>
+                            <span id="game_players_min">?</span>
+                            -
+                            <span id="game_players_max">?</span>
+                            (<span id="game_age_min">?</span>+)
+                        </div>
+                        <div>
+                            <span class="game_card_label">Time:</span>
+                            <span id="game_time_min">?</span>
+                            -
+                            <span id="game_time_max">?</span>
+                            min
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
 
         <!-- libraries -->
         <script src="/scripts/jquery-3.4.1.js"></script>

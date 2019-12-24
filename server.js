@@ -6,6 +6,10 @@ const upload = multer();
 // redirection to https
 const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
 
+// https stuff?
+const fs = require('fs');
+const https = require("https");
+
 // links to files
 const gamedb = require('./gamedb.js')
 
@@ -38,10 +42,20 @@ function startServer() {
    app.use(express.static('public'));
  
    // Start the server
-   return app.listen('8000', () => {
-     // eslint-disable-next-line no-console
-     console.log('Local DevServer Started on port 8000...');
-   });
+  //  app.listen('8000', () => {
+  //    // eslint-disable-next-line no-console
+  //    console.log('Local DevServer Started on port 8000...');
+  //  });
+
+   //https.createServer({}, app).listen(8080);
+   https.createServer({
+      key: fs.readFileSync('newkey.pem'),
+      cert: fs.readFileSync('cert.pem')
+    }, app).listen('8000', () => {
+      // eslint-disable-next-line no-console
+      console.log('Local DevServer Started on port 8000...');
+    });
+
  }
  
  startServer();
