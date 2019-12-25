@@ -13,31 +13,35 @@
             
             <div id="roll_overlay" class="mainscreen_overlay">
                 <div id="roll_animation_panel" class="game_roll_panel">
-                    <div>
-                        Selecting game...
-                        <img src="./images/dice_fall.gif">
+                    <div class="content_centerer">
+                        <div class="content_block">
+                            <div>Selecting game...</div>
+                            <img src="./images/dice_fall.gif">
+                        </div>
                     </div>
                 </div>
                 <div id="roll_result_panel" class="game_roll_panel">
-                    <div>
-                        Picked
-                        <span id="roll_result_title">-</span>
-                        out of 
-                        <span id="roll_result_length">-</span>
-                        games
+                    <div class="content_centerer">
+                        <div class="content_block">
+                            <div>Picked:</div>
+                            <div id="roll_result_title">-</div>
+                            <img id="roll_result_img" src="">
+                            <div>out of <span id="roll_result_length">-</span> games</div>
+                            <button id="button_play">Play it</button>
+                            <button id="button_reroll">Reroll</button>
+                            <button id="button_updatefilters">Change filters</button>
+                        </div>
                     </div>
-                    <div><img id="roll_result_img" src=""></div>
-                    <button id="button_play">Awesome, we'll play it!</button>
-                    <button id="button_reroll">Nah, pick another one please</button>
-                    <button id="button_updatefilters">Wait, let me change the filters</button>
                 </div>
                 <div id="roll_nogame_panel" class="game_roll_panel">
-                    <div>
-                        No games were found! :(
-                        <img src="./images/empty_box.jpg">
+                    <div class="content_centerer">
+                        <div class="content_block">
+                            <div>No games were found! :(</div>
+                            <img src="./images/empty_box.jpg">
+                            <button id="button_closenogame">Ok, I'll try something else!</button>
+                        </div>
                     </div>
                     
-                    <div><button id="button_closenogame">Ok, I'll try something else!</button></div>
                 </div>
             </div>
 
@@ -121,62 +125,68 @@
 
 
 
-            <div id="app_menu">
+            <div id="app_menu" class="app_menu">
                 <a id="app_menu_roll">Roll!</a>
                 <a id="app_menu_games">Games</a>
-                <a id="add_game">+</a>
             </div>
 
             <div id="game_selection" class="mainscreen">
 
-                <div class="game_roll_panel">
-                    <form id="roll_form" autocomplete="off">
-                        
-                        <div>Number of players</div>
-                        <div><input name="player_num" type="number" required value="3"></div>
-                        <div>Duration (minutes)</div>
-                        <div><input name="duration_max" type="number" required value="10"></div>
-                        <div>Minimum age</div>
-                        <div><input name="player_age_min" type="number" required value="10"></div>
-
-                        <button type="submit">Select game!</button>
-                    </form>
+                <!--<div class="game_roll_form"></div>-->
+                <div class="content_centerer">
+                    <div class="content_block game_roll_form">
+                        <form id="roll_form" autocomplete="off">
+                            
+                            <div>I'm looking for a game for</div>
+                            <input id="roll_player_num" type="number" required value="3" placeholder="...">
+                            <div>people, that takes under</div>
+                            <input id="roll_duration_max" type="number" required value="120" placeholder="...">
+                            <div>minutes to play, for</div>
+                            <input id="roll_player_age_min" type="number" required value="10"placeholder="...">
+                            <div>years and older.</div>
+                            <button type="submit">Pick a game</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-
+                
             <div id="game_management" class="mainscreen">
-                <div id="game_card_list">
+                <div class="container_flexflow">
+                    <div class="container_scrollable">
+                        <div id="game_card_list">
 
+                        </div>
+                    </div>
+
+                    <div class="app_submenu app_menu">
+                        <a id="add_game">+</a>
+                    </div>
                 </div>
-
-
             </div>
 
 
             
         </main>
 
-        <!-- templates for app -->
-        <template>
-
-            <!-- template for game record in management screen -->
-            <div id="game_record_template" class="game_record">
-                <div id="game_title" class="game_record_title">?</div>
+        <!-- template for game record in management screen -->
+        <template id="game_record_template">
+            <div class="game_record">
+                <div class="game_record_title">?</div>
                 <div class="game_record_info">
-                    <img id="game_cover" src="/images/game_box_missing.jpg">
+                    <img class="game_cover" src="/images/game_box_missing.jpg">
                     <div>
                         <div>
-                            <span class="game_card_label">Players:</span>
-                            <span id="game_players_min">?</span>
+                            <span class="game_record_label">Players:</span>
+                            <span class="game_record_players_min">?</span>
                             -
-                            <span id="game_players_max">?</span>
-                            (<span id="game_age_min">?</span>+)
+                            <span class="game_record_players_max">?</span>
+                            (<span class="game_record_players_age">?</span>+)
                         </div>
                         <div>
-                            <span class="game_card_label">Time:</span>
-                            <span id="game_time_min">?</span>
+                            <span class="game_record_label">Time:</span>
+                            <span class="game_record_duration_min">?</span>
                             -
-                            <span id="game_time_max">?</span>
+                            <span class="game_record_duration_max">?</span>
                             min
                         </div>
                     </div>

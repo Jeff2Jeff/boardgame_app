@@ -2,6 +2,7 @@
 
 const local_game_db = new PouchDB('gamedb_local');
 
+// TODO: thumbnail url and image url for different screens
 
 /**
  * Add a game to the local_game_db

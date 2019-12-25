@@ -24,10 +24,10 @@ function get_game_list(e) {
     if (e.preventDefault) e.preventDefault();
 
     // find the value field in the forms
-    var tmp_form_inputs = e.target.getElementsByTagName('input');
-    var player_num = parseInt(tmp_form_inputs['player_num'].value);
-    var player_age_min = parseInt(tmp_form_inputs['player_age_min'].value);
-    var duration_max = parseInt(tmp_form_inputs['duration_max'].value);
+    //var tmp_form_inputs = e.target.getElementsByTagName('input');
+    var player_num = parseInt($('#roll_player_num').val());
+    var player_age_min = parseInt($('#roll_player_age_min').val());
+    var duration_max = parseInt($('#roll_duration_max').val());
     
     // TODO: check values integrity? (Note: should also already be done by form...)
 
@@ -124,7 +124,7 @@ function navigate_to(event) {
 
     var newpage_id = event.data['page_id'];
 
-    // TODO: move to appropriate place
+    // TODO: move to appropriate place?
     generate_all_cards();
 
     // TODO: some animation
@@ -154,7 +154,7 @@ function generate_game_card(game_doc)
     //console.log(game_doc);
 
     // get a copy of the template, clone it and update the id
-    var tmp = $('#game_record_template').clone()
+    var tmp = $($('#game_record_template').html());
     tmp.attr('id','card_' + game_doc['id'])
 
     // get remote image url, or show missing cover image
@@ -162,15 +162,15 @@ function generate_game_card(game_doc)
     image_url = (image_url !== undefined & image_url.length > 0) ?
                         image_url : MISSING_COVER_IMAGE;
 
-    tmp.find('#game_cover').attr('src',image_url);
+    tmp.find('.game_cover').attr('src',image_url);
     
     // set contents of the card
-    tmp.find('#game_title').html(game_doc['title'])
-    tmp.find('#game_time_min').html(game_doc['duration_min'])
-    tmp.find('#game_time_max').html(game_doc['duration_max'])
-    tmp.find('#game_players_min').html(game_doc['players_min'])
-    tmp.find('#game_players_max').html(game_doc['players_max'])
-    tmp.find('#game_age_min').html(game_doc['players_age'])
+    tmp.find('.game_record_title').html(game_doc['title'])
+    tmp.find('.game_record_duration_min').html(game_doc['duration_min'])
+    tmp.find('.game_record_duration_max').html(game_doc['duration_max'])
+    tmp.find('.game_record_players_min').html(game_doc['players_min'])
+    tmp.find('.game_record_players_max').html(game_doc['players_max'])
+    tmp.find('.game_record_players_age').html(game_doc['players_age'])
 
     return tmp;
 }
@@ -189,11 +189,13 @@ function generate_all_cards() {
 
             $('#game_card_list').html('');
 
-            game_list_full.forEach(game_doc => {
-                var new_card = generate_game_card(game_doc);
-                new_card.show();
-                $('#game_card_list').append(new_card);
-            });
+            for(var i = 0; i < 4; i++) {
+                game_list_full.forEach(game_doc => {
+                    var new_card = generate_game_card(game_doc);
+                    new_card.show();
+                    $('#game_card_list').append(new_card);
+                });
+            }
 
     }).catch(function(error){
         console.log('DB lookup error', error);
@@ -481,7 +483,7 @@ $(document).ready(function() {
     $('#button_play').on('click',close_results);
 
     /** game management stuff */
-    $('#game_record_template').hide();
+    //$('#game_record_template').hide();
     $('#add_game').on('click',open_game_popup);
     $('#add_game_close').on('click',close_game_popup);
 
@@ -496,6 +498,7 @@ $(document).ready(function() {
 
     // initial page of the app
     $('#app_menu_games').trigger('click');
+    //$('#app_menu_roll').trigger('click');
 
     generate_all_cards();
 });
