@@ -13,7 +13,7 @@
             
             <div id="roll_overlay" class="mainscreen_overlay">
                 <div id="roll_animation_panel" class="game_roll_panel">
-                    <div class="content_centerer">
+                    <div class="content_centerer container_flexflow">
                         <div class="content_block">
                             <div>Selecting game...</div>
                             <img src="./images/dice_fall.gif">
@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div id="roll_result_panel" class="game_roll_panel">
-                    <div class="content_centerer">
+                    <div class="content_centerer container_flexflow">
                         <div class="content_block">
                             <div>Picked:</div>
                             <div id="roll_result_title">-</div>
@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div id="roll_nogame_panel" class="game_roll_panel">
-                    <div class="content_centerer">
+                    <div class="content_centerer container_flexflow">
                         <div class="content_block">
                             <div>No games were found! :(</div>
                             <img src="./images/empty_box.jpg">
@@ -46,79 +46,106 @@
             </div>
 
             <div id="add_game_overlay" class="mainscreen_overlay">
-
-                <div id="add_game_screen">
-                    <button id="add_game_close">Close</button>
-                    <button id="add_game_searchbgg">Search BGG</button>
-
-                    <form id="add_game_form" autocomplete="off">
-
-                        <!-- TODO: upload custom image-->
-                        <div>Title:<input id="newgame_title" required></div>
-                        <div><img id="newgame_image" src="/images/game_box_missing.jpg"></div>
-                        <div>Players (min):<input id="newgame_players_min" type="number" required></div>
-                        <div>Players (max):<input id="newgame_players_max" type="number"  required></div>
-                        <div>Duration (min):<input id="newgame_duration_min" type="number"  required></div>
-                        <div>Duration (max):<input id="newgame_duration_max" type="number"  required></div>
-                        <div>Players (age):<input id="newgame_players_age" type="number"  required></div>
-
-                        <div>
-                            <button type="submit">Add game</button>
+                
+                <div id="add_game_screen" class="game_add_panel">
+                    <div class="container_flexflow">
+                        <div class="app_menu">
+                            <a id="add_game_close">Close</a>
+                            <a id="add_game_searchbgg">Search BGG</a>
                         </div>
-                    </form>
+
+                        <div class="container_scrollable">
+                            <div class="content_block">
+                                <form id="add_game_form" autocomplete="off">
+                                    <!-- TODO: upload custom image-->
+                                    <div>Title:</div>
+                                    <input id="newgame_title" required>
+                                    <div><img id="newgame_image" src="/images/game_box_missing.jpg"></div>
+                                    <div>Players (min):</div>
+                                    <input id="newgame_players_min" type="number" required>
+                                    <div>Players (max):</div>
+                                    <input id="newgame_players_max" type="number"  required>
+                                    <div>Duration (min):</div>
+                                    <input id="newgame_duration_min" type="number"  required>
+                                    <div>Duration (max):</div>
+                                    <input id="newgame_duration_max" type="number"  required>
+                                    <div>Players (age):</div>
+                                    <input id="newgame_players_age" type="number"  required>
+                                    <button type="submit">Add game</button> 
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                
 
-                <div id="screen_search_bgg">
-                    <form id="search_game_form" autocomplete="off">
-                        <div><input id="search_term" required></div>
-                        <div><button type="submit">Search</button></div>
-                    </form>
-
-                    <div id="search_game_results"></div>
-
-                    <button id="search_game_close">Close</button>
-                </div>
-
-                <div id="screen_bgg_details">
-
-                    <div id="bgg_details_game">
-                        <div id="bgg_details_title">?</div>
+                <div id="screen_search_bgg" class="game_add_panel">
+                    <div class="container_flexflow">
+                        <div class="app_menu">
+                            <form id="search_game_form" autocomplete="off">
+                                <div><input id="search_term" required></div>
+                                <div><button type="submit">Search</button></div>
+                            </form>
+                        </div>
+                     
+                        <div class="container_scrollable">
+                            <div id="search_game_results" class="content_scrollable search_results"></div>
+                        </div>
                         
-                        <div>
-                            <div>
-                                <img id="bgg_details_cover" src="/images/game_box_missing.jpg">
-                            </div>
-                            <div>
-                                <div>
-                                    <span>Players:</span>
-                                    <span id="bgg_details_players_min">?</span>
-                                    -
-                                    <span id="bgg_details_players_max">?</span>
-                                    (<span id="bgg_details_age_min">?</span>+)
+
+                        <div class="app_menu">
+                            <a id="search_game_close">Close</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="screen_bgg_details" class="game_add_panel">
+
+                    <div class="container_flexflow">
+
+                        <div id="bgg_details_game">
+                            
+                            <div class="game_record">
+                                <div class="game_record_title" id="bgg_details_title">?</div>
+                                <div class="game_record_info">
+                                    <img id="bgg_details_cover" class="game_cover" src="/images/game_box_missing.jpg">
+                                    <div>
+                                        <div>
+                                            <span class="game_record_label">Players:</span>
+                                            <span id="bgg_details_players_min">?</span>
+                                            -
+                                            <span id="bgg_details_players_max">?</span>
+                                            (<span id="bgg_details_age_min">?</span>+)
+                                        </div>
+                                        <div>
+                                            <span class="game_record_label">Time:</span>
+                                            <span id="bgg_details_time_min">?</span>
+                                            -
+                                            <span id="bgg_details_time_max">?</span>
+                                            min
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span>Time:</span>
-                                    <span id="bgg_details_time_min">?</span>
-                                    -
-                                    <span id="bgg_details_time_max">?</span>
-                                    min
-                                </div>
                             </div>
-                            <div>
-                                <button id="bgg_details_select">Select</button>
-                                <button id="bgg_details_close">Close</button>
-                            </div>
+
+
+                        </div>
+                    
+                        <div>Available names:</div>
+                        <div class="container_scrollable">
+                            <div id="bgg_details_altnames" class="content_scrollable search_results"></div>
+                        </div>
+                        <div>Available versions:</div>
+                        <div class="container_scrollable">
+                            <div id="bgg_details_versions" class="content_scrollable search_results"></div>
+                        </div>
+
+                        <div class="app_menu">
+                            <a id="bgg_details_close">Close</a>
+                            <a id="bgg_details_select">Select</a>
                         </div>
 
                     </div>
-
-                    <div>Available names:</div>
-                    <div id="bgg_details_altnames"></div>
-                    <div>Available versions:</div>
-                    <div id="bgg_details_versions"></div>
-                    
-                    
-
                 </div>
                 
             </div>
@@ -133,7 +160,7 @@
             <div id="game_selection" class="mainscreen">
 
                 <!--<div class="game_roll_form"></div>-->
-                <div class="content_centerer">
+                <div class="content_centerer container_flexflow">
                     <div class="content_block game_roll_form">
                         <form id="roll_form" autocomplete="off">
                             
@@ -152,7 +179,14 @@
                 
             <div id="game_management" class="mainscreen">
                 <div class="container_flexflow">
-                    <div class="container_scrollable">
+
+                    <div id="games_list_empty" class="content_centerer">
+                        <div class="content_block">
+                            No games here! :(
+                        </div>
+                    </div>
+
+                    <div id="games_list_full" class="container_scrollable">
                         <div id="game_card_list">
 
                         </div>
@@ -163,9 +197,6 @@
                     </div>
                 </div>
             </div>
-
-
-            
         </main>
 
         <!-- template for game record in management screen -->

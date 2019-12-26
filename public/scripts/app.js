@@ -1,6 +1,5 @@
 'use strict';
 
-const MISSING_COVER_IMAGE = '/images/game_box_missing.jpg';
 
 // TODO: setup generic logging (dev vs production?)
 // TODO: add error handling
@@ -155,7 +154,7 @@ function generate_game_card(game_doc)
 
     // get a copy of the template, clone it and update the id
     var tmp = $($('#game_record_template').html());
-    tmp.attr('id','card_' + game_doc['id'])
+    tmp.attr('id','card_' + game_doc['_id'])
 
     // get remote image url, or show missing cover image
     var image_url = game_doc['remote_image_url'];
@@ -183,20 +182,28 @@ function generate_all_cards() {
 
     // TODO: show loading screen
 
+    
 
     get_all_games().then(
         function(game_list_full) {
 
+            $('#games_list_empty').hide();
+            $('#games_list_full').hide();
             $('#game_card_list').html('');
 
-            for(var i = 0; i < 4; i++) {
+            if(game_list_full.length > 0) {
+
+
                 game_list_full.forEach(game_doc => {
                     var new_card = generate_game_card(game_doc);
                     new_card.show();
                     $('#game_card_list').append(new_card);
                 });
-            }
 
+                $('#games_list_full').show();
+            } else {
+                $('#games_list_empty').show();
+            }
     }).catch(function(error){
         console.log('DB lookup error', error);
     });
@@ -290,7 +297,8 @@ function form_search_bgg(e) {
         $('#search_game_results').html('');
         search_result_list.forEach(function(search_result) {
             
-            var tmp_html = $('<a>[title] ([year])</a>'
+            // TODO: use template
+            var tmp_html = $('<a class="search_result">[title] ([year])</a>'
                 .replace('[title]',search_result['title'])
                 .replace('[year]',search_result['year'])
             );
