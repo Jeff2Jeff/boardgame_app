@@ -2,6 +2,12 @@
 
 const local_game_db = new PouchDB('gamedb_local');
 
+local_game_db.createIndex({
+    index: {
+      fields: ['title']
+    }
+  })
+
 local_game_db.changes({ 
     live: true,
     include_docs: true
@@ -56,8 +62,28 @@ function game_db_add (
     })    
 }
 
-function game_db_edit() {
+function game_db_edit(game_doc,
+            in_bgg_id, in_title
+            , in_players_min, in_players_max, in_players_age
+            , in_time_min, in_time_max
+            , in_imageurl = null
+            ) {
 
+    // TODO: support more edits
+    game_doc['title'] = in_title;
+    game_doc['players_min'] = parseInt(in_players_min);
+    game_doc['players_max'] = parseInt(in_players_max);
+    game_doc['players_age'] = parseInt(in_players_age);
+    game_doc['duration_min'] = parseInt(in_time_min);
+    game_doc['duration_max'] = parseInt(in_time_max);
+    game_doc['remote_image_url'] = in_imageurl;
+
+    local_game_db.put(game_doc).then(function(response) {
+        console.log(response);
+
+    }).catch(function(error){
+        console.log(error);
+    })    
 }
 
 function game_db_delete(game) {
@@ -84,6 +110,7 @@ function find_games(in_numplayers, in_duration, in_minage) {
         ,players_max: {$gte: in_numplayers}
         ,players_age: {$lte: in_minage}
         ,duration_max: {$lte: in_duration}
+        ,title: {$exists: true}
     });
 }
 
@@ -105,29 +132,42 @@ function get_all_games() {
  */
 // TODO: sorting
 function get_games_from_db(selector_in) {
+    
+    var tmp_keys = [];
 
-    return local_game_db.find({
-        selector: selector_in
-    }).then(function (result) {
+    for (var key in selector_in) {
+        tmp_keys.push(key);
+     }
+    
+    return local_game_db.createIndex({
+        index: {
+            fields: tmp_keys
+        }
+    }).then(function(result) {
         
-        var tmp_results = [];
+        return local_game_db.find({
+            selector: selector_in,
+            sort: tmp_keys
+        }).then(function (result) {
+        
+            var tmp_results = [];
 
-        // loop over all results and create Game objects for them
-        // TODO: is push with separate array needed?
-        result.docs.map(function(doc) {
-            //return doc;
-            tmp_results.push(doc);
+            // loop over all results and create Game objects for them
+            // TODO: is push with separate array needed?
+            result.docs.map(function(doc) {
+                //return doc;
+                tmp_results.push(doc);
+            })
+
+            return tmp_results;
+
+        }).catch(function(error){
+            // if something goes wrong, just print the error for now and return an empty list
+            console.error("Something bad happened", error);
+            return [];
         })
-
-        return tmp_results;
-
-    }).catch(function(error){
-        // if something goes wrong, just print the error for now and return an empty list
-        console.error("Something bad happened", error);
-        return [];
     });
 }
-
 
 
 

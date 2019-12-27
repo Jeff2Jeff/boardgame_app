@@ -140,68 +140,31 @@ function navigate_to(event) {
 }
 
 /**
- * Generate a new html element representing the game, 
- * based on a provide document (PouchDB)
- *
- * HTML element will be provided based on the template
- * 
- * @param {*} game_doc
- */
-function generate_game_card_old(game_doc)
-{
-    //console.log(game_doc);
-
-    // get a copy of the template, clone it and update the id
-    var tmp = $($('#game_record_template').html());
-    tmp.attr('id','card_' + game_doc['_id'])
-
-    // get remote image url, or show missing cover image
-    var image_url = game_doc['remote_image_url'];
-    image_url = (image_url !== undefined & image_url.length > 0) ?
-                        image_url : MISSING_COVER_IMAGE;
-
-    tmp.find('.game_cover').attr('src',image_url);
-    
-    // set contents of the card
-    tmp.find('.game_record_title').html(game_doc['title'])
-    tmp.find('.game_record_duration_min').html(game_doc['duration_min'])
-    tmp.find('.game_record_duration_max').html(game_doc['duration_max'])
-    tmp.find('.game_record_players_min').html(game_doc['players_min'])
-    tmp.find('.game_record_players_max').html(game_doc['players_max'])
-    tmp.find('.game_record_players_age').html(game_doc['players_age'])
-
-    return tmp;
-}
-
-
-/**
  * Generate list of cards for all games in the local database
  */
 function generate_all_cards() {
 
     // TODO: show loading screen
-
     
+    get_all_games().then(function(game_list_full) {
 
-    get_all_games().then(
-        function(game_list_full) {
+        $('#games_list_empty').hide();
+        $('#games_list_full').hide();
+        $('#game_card_list').html('');
 
-            $('#games_list_empty').hide();
-            $('#games_list_full').hide();
-            $('#game_card_list').html('');
+        if(game_list_full.length > 0) {
 
-            if(game_list_full.length > 0) {
+            game_list_full.forEach(game_doc => {
+                var new_card = generate_game_card(game_doc);
+                new_card.show();
+                $('#game_card_list').append(new_card);
+            });
 
-                game_list_full.forEach(game_doc => {
-                    var new_card = generate_game_card(game_doc);
-                    new_card.show();
-                    $('#game_card_list').append(new_card);
-                });
+            $('#games_list_full').show();
+        } else {
+            $('#games_list_empty').show();
+        }
 
-                $('#games_list_full').show();
-            } else {
-                $('#games_list_empty').show();
-            }
     }).catch(function(error){
         console.log('DB lookup error', error);
     });
@@ -209,6 +172,15 @@ function generate_all_cards() {
 
 
 function open_game_popup(event) {
+
+    // fill fields for adding
+    $('#newgame_submit').html('Add game');
+    $('#add_game_form').off();
+    $('#add_game_form').on('submit',{'game_doc':null},add_game_to_lib);
+
+
+    $('#add_game_searchbgg').show();
+    
 
     // show the overlay and screen
     $('#add_game_overlay').show();
@@ -246,16 +218,32 @@ function add_game_to_lib(e) {
         image_url = "";
     }
     
-    game_db_add(
-        -1,
-        $('#newgame_title').val(),
-        $('#newgame_players_min').val(),
-        $('#newgame_players_max').val(),
-        $('#newgame_players_age').val(),
-        $('#newgame_duration_min').val(),
-        $('#newgame_duration_max').val(),
-        image_url
-    );
+    // if a game was provided, treat this as an edit
+    var local_game = e.data['game_doc'];
+    if(local_game) {
+        game_db_edit(local_game,
+            -1,
+            $('#newgame_title').val(),
+            $('#newgame_players_min').val(),
+            $('#newgame_players_max').val(),
+            $('#newgame_players_age').val(),
+            $('#newgame_duration_min').val(),
+            $('#newgame_duration_max').val()
+            );
+    } else {
+        game_db_add(
+            -1,
+            $('#newgame_title').val(),
+            $('#newgame_players_min').val(),
+            $('#newgame_players_max').val(),
+            $('#newgame_players_age').val(),
+            $('#newgame_duration_min').val(),
+            $('#newgame_duration_max').val(),
+            image_url
+        );
+    }
+
+
 
     //generate_all_cards();
     close_game_popup();
@@ -467,52 +455,6 @@ function select_details_bgg(event) {
     $('#add_game_screen').show()
 }
 
-/** 
- * All things that happen after document loads go here.
- */
-$(document).ready(function() {
-
-    /** menu stuff */
-
-    // menu navigation functions
-    $('#app_menu_roll').on('click',{page_id: '#game_selection'},navigate_to);
-    $('#app_menu_games').on('click',{page_id: '#game_management'},navigate_to);
-
-    /** gameroll stuff  */
-
-    // form submitted to roll for a game
-    $("#roll_form").submit(get_game_list);
-
-    // reroll without updating filters
-    $('#button_reroll').on('click',roll_for_game);
-    // close all results and get access to the form again
-    $('#button_updatefilters').on('click',close_results);
-    $('#button_closenogame').on('click',close_results);
-
-    // accept suggestion and play the game
-    // TODO: track recently played games to exclude from reroll
-    $('#button_play').on('click',close_results);
-
-    /** game management stuff */
-    //$('#game_record_template').hide();
-    $('#add_game').on('click',open_game_popup);
-    $('#add_game_close').on('click',close_game_popup);
-
-    $('#add_game_form').submit(add_game_to_lib);
-    $('#add_game_searchbgg').on('click',open_search_bgg);
-
-    $("#search_game_form").submit(form_search_bgg);
-    $('#search_game_close').on('click',close_search_bgg);
-    
-    $('#bgg_details_select').on('click',select_details_bgg);
-    $('#bgg_details_close').on('click',close_details_bgg);
-
-    // initial page of the app
-    $('#app_menu_games').trigger('click');
-    //$('#app_menu_roll').trigger('click');
-
-    generate_all_cards();
-});
 
 function open_game_edit(event) {
     // TODO: merge with add game UI path
@@ -521,6 +463,15 @@ function open_game_edit(event) {
 
     fill_game_edit_screen(local_game);
 
+    // update the add game button to be for editing
+    $('#newgame_submit').html('Save changes');
+    $('#add_game_form').off();
+    $('#add_game_form').on('submit',data={'game_doc':local_game},add_game_to_lib);
+
+    // hide the search BGG button
+    // TODO: maybe the search bgg is still fine for editing...
+    $('#add_game_searchbgg').hide();
+    
     // show the overlay and screen
     $('#add_game_overlay').show();
     $('#add_game_screen').show();
@@ -577,3 +528,49 @@ function close_game_delete() {
 function randomIntFromInterval(min, max) { // min and max included 
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+/** 
+ * All things that happen after document loads go here.
+ */
+$(document).ready(function() {
+
+    /** menu stuff */
+
+    // menu navigation functions
+    $('#app_menu_roll').on('click',{page_id: '#game_selection'},navigate_to);
+    $('#app_menu_games').on('click',{page_id: '#game_management'},navigate_to);
+
+    /** gameroll stuff  */
+
+    // form submitted to roll for a game
+    $("#roll_form").submit(get_game_list);
+
+    // reroll without updating filters
+    $('#button_reroll').on('click',roll_for_game);
+    // close all results and get access to the form again
+    $('#button_updatefilters').on('click',close_results);
+    $('#button_closenogame').on('click',close_results);
+
+    // accept suggestion and play the game
+    // TODO: track recently played games to exclude from reroll
+    $('#button_play').on('click',close_results);
+
+    /** game management stuff */
+    //$('#game_record_template').hide();
+    $('#add_game').on('click',open_game_popup);
+    $('#add_game_close').on('click',close_game_popup);
+
+    $('#add_game_searchbgg').on('click',open_search_bgg);
+
+    $("#search_game_form").submit(form_search_bgg);
+    $('#search_game_close').on('click',close_search_bgg);
+    
+    $('#bgg_details_select').on('click',select_details_bgg);
+    $('#bgg_details_close').on('click',close_details_bgg);
+
+    // initial page of the app
+    $('#app_menu_games').trigger('click');
+    //$('#app_menu_roll').trigger('click');
+
+    generate_all_cards();
+});
