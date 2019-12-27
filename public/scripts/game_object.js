@@ -1,5 +1,9 @@
 const MISSING_COVER_IMAGE = '/images/game_box_missing.jpg';
 
+// TODO: u
+function GameDoc() {
+    
+}
 
 /**
  * Return image url of a game
@@ -9,7 +13,8 @@ const MISSING_COVER_IMAGE = '/images/game_box_missing.jpg';
  */
 function get_image_url(game_doc) {
     var image_url = game_doc['remote_image_url'];
-    return (image_url !== undefined & image_url.length > 0) ?
+    
+    return (image_url != null && image_url !== undefined && image_url.length > 0) ?
                         image_url : MISSING_COVER_IMAGE;
 }
 
@@ -62,3 +67,4 @@ function fill_game_edit_screen(game_doc) {
     result_element.find('#newgame_players_age').val(game_doc['players_age'])
 
 }
+

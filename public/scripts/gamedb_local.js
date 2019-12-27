@@ -169,6 +169,107 @@ function get_games_from_db(selector_in) {
     });
 }
 
+/** 
+ * Export local game database to json file
+ */
+function game_list_export() {
+
+    var result_json = {
+        name: 'boardgameapp_export'
+        , version: '0.1'
+        , time_stamp: new Date().toLocaleString()
+        , game_list: []
+    };
+
+    get_all_games().then(function(result) {
+
+        // add all games to the list
+        result.forEach(function(game_doc) {
+            
+            // remove id and revision tags
+            delete game_doc['_id'];
+            delete game_doc['_rev'];
+
+            result_json.game_list.push(game_doc);
+        });
+
+        // create link element and click it to offer download
+        var tmp_anchor = $('<a></a>');
+        tmp_anchor.attr('download', 'gameapp_export.json');
+        tmp_anchor.attr('href', 'data:text/json,' +
+            encodeURIComponent(JSON.stringify(result_json)));
+        $('#add_game_overlay').append(tmp_anchor);
+        tmp_anchor[0].click();
+        tmp_anchor.remove();
+        
+
+    }).catch(function(error){
+        console.log(error);
+    });
+
+}
+
+function delete_all_games() {
+    // TODO: confirmation
+
+    // delete all games
+    return get_all_games().then(function(result) {
+        result.forEach(function(game_doc) {
+            game_db_delete(game_doc);
+        });
+    }).catch(function(error) {
+        console.log(error);
+    });
+}
+
+function game_list_import() {
+
+    // TODO: test contents of json
+
+    // create link element and click it to offer download
+
+    var tmp_input = $('<input></input>');
+    tmp_input.attr('type','file');
+    tmp_input.attr('accept','.json')
+    tmp_input.hide();
+    $('#add_game_overlay').append(tmp_input);
+    tmp_input.on('change',function(event){
+        var file = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = (function(tmpFile){
+            return function(e) {
+                process_import_file(e.target.result);
+            }
+        })(file);
+        reader.readAsText(file);
+    })
+    tmp_input[0].click();
+   
+}
+
+// process json contents imported file
+function process_import_file(filelist_json) {
+    
+    var list_json = JSON.parse(filelist_json);
+
+    delete_all_games().then(function(result){
+        
+        list_json.game_list.forEach(function(newgame) {
+            
+            local_game_db.post(newgame).then(function(response) {
+        
+                //resolve(response);
+        
+            }).catch(function(error){
+                console.log(error);
+            })   
+
+        });
+
+    }).catch(function(error) {
+        console.log(error);
+    });
+};
 
 
 /**

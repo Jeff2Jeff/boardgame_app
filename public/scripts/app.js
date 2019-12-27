@@ -1,6 +1,7 @@
 'use strict';
 
-
+var will_respond_to_shaking = false;
+var shake_from_main = true;
 // TODO: setup generic logging (dev vs production?)
 // TODO: add error handling
 
@@ -18,7 +19,9 @@ var bgg_details_game = {};
  * Local DB interaction goes here
  */
 function get_game_list(e) {
-    
+
+    will_respond_to_shaking = false;
+
     // prevent default form (redirectish) behavior
     if (e.preventDefault) e.preventDefault();
 
@@ -53,6 +56,8 @@ function get_game_list(e) {
  */
 function roll_for_game() {
 
+    will_respond_to_shaking = false;
+
     // show generic overlay that disables the form
     $('#roll_overlay').show();
     
@@ -69,6 +74,16 @@ function roll_for_game() {
         // if any results were found, continue to pick one
         if(game_pick_list.length > 0) {
             
+            if(game_pick_list.length > 1) {
+                shake_from_main = false;
+                will_respond_to_shaking = true;
+            } else {
+                shake_from_main = true;
+                will_respond_to_shaking = false;
+            }
+            
+            //$('#roll_overlay').prepend($('<div>' + shake_from_main + '</div>'))
+
             var gamelist_length_initial = game_pick_list.length;
             var selected_index = randomIntFromInterval(0, gamelist_length_initial - 1);
             //selected_game = game_pick_list[selected_index];
@@ -113,6 +128,10 @@ function close_results() {
     $('#roll_animation_panel').hide();
     $('#roll_result_panel').hide();
     $('#roll_nogame_panel').hide()
+
+    // testing device motion things
+    will_respond_to_shaking = true;
+    shake_from_main = true;
 }
 
 /**
@@ -120,12 +139,18 @@ function close_results() {
  */
 function navigate_to(event) {
 
+    
     var newpage_id = event.data['page_id'];
 
-    // TODO: move to appropriate place?
-    //generate_all_cards();
+    // set only the newly navigate pages to 'active'
+    $('#app_menu a').attr('class','');
+    $(event.target).attr('class','active_tab');
 
-    // TODO: some animation
+    // only respond to shaking when on the roll page
+    will_respond_to_shaking = (newpage_id == '#game_selection');
+    
+
+    // TODO: some animation?
 
     // Hide currently active page
     if($(active_page_id)) {
@@ -228,7 +253,8 @@ function add_game_to_lib(e) {
             $('#newgame_players_max').val(),
             $('#newgame_players_age').val(),
             $('#newgame_duration_min').val(),
-            $('#newgame_duration_max').val()
+            $('#newgame_duration_max').val(),
+            image_url
             );
     } else {
         game_db_add(
@@ -543,7 +569,7 @@ $(document).ready(function() {
     /** gameroll stuff  */
 
     // form submitted to roll for a game
-    $("#roll_form").submit(get_game_list);
+    //$("#roll_form").submit(get_game_list);
 
     // reroll without updating filters
     $('#button_reroll').on('click',roll_for_game);
@@ -568,9 +594,60 @@ $(document).ready(function() {
     $('#bgg_details_select').on('click',select_details_bgg);
     $('#bgg_details_close').on('click',close_details_bgg);
 
+    $('#game_list_export').on('click',game_list_export);
+    $('#game_list_import').on('click',game_list_import);
+
+    $('#roll_submit').on('click',function(event){
+        
+        var roll_form_element = $("#roll_form")[0];
+        roll_form_element.reportValidity();
+
+        if (roll_form_element.checkValidity()) {
+            //roll_form_element.submit();
+            get_game_list(event);
+        }
+    });
+
+    // test rolling stuff
+    if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', repond_to_shaking);
+        will_respond_to_shaking = true;
+    }
+      
+
     // initial page of the app
     $('#app_menu_games').trigger('click');
     //$('#app_menu_roll').trigger('click');
 
     generate_all_cards();
 });
+
+
+
+function repond_to_shaking(evt) {
+
+    var tmp_x = evt.acceleration.x;
+    var tmp_y = evt.acceleration.x;
+    var tmp_z = evt.acceleration.x;
+    var tmp_total = Math.sqrt(tmp_x*tmp_x + tmp_y * tmp_y + tmp_z * tmp_z);
+    
+    //TODO: tweak shaking repsoniveness
+    if(will_respond_to_shaking && tmp_total > 20) {
+        // do the shaking things
+        //alert('shake!');
+
+        if(shake_from_main) {
+            $('#roll_submit').click();
+        }
+        else
+        {
+            $('#button_reroll').click();
+        }
+        
+        //$('#roll_submit').click();
+
+        will_respond_to_shaking = false;
+        //e.target.removeEventListener('devicemotion');
+        //setTimeout(function(){will_respond_to_shaking = true},2000);
+    }
+}
