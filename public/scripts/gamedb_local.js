@@ -2,6 +2,17 @@
 
 const local_game_db = new PouchDB('gamedb_local');
 
+local_game_db.changes({ 
+    live: true,
+    include_docs: true
+  }).on('change', function (change) {
+    generate_all_cards();
+    // if (change.doc && change.doc.model === 'note') {
+    //   console.log(change);
+    // }
+  });
+
+
 // TODO: thumbnail url and image url for different screens
 
 /**
@@ -15,7 +26,7 @@ const local_game_db = new PouchDB('gamedb_local');
  * @param {*} in_time_min minimum playtime in minutes (recommended)
  * @param {*} in_time_max maximum playtime in minutes (recommended)
  */
-function add_game(
+function game_db_add (
             in_bgg_id, in_title
             , in_players_min, in_players_max, in_players_age
             , in_time_min, in_time_max
@@ -45,81 +56,79 @@ function add_game(
     })    
 }
 
+function game_db_edit() {
+
+}
+
+function game_db_delete(game) {
+    local_game_db.remove(game)
+    .then(function(resolve) {
+        // TODO: anything?
+    }).catch(function(error){
+        console.log('db delete', error)
+    })
+}
+
 /**
  * returns all games in the game_db (local) that meet the filter requirements
  * 
  * @param {*} in_numplayers Number of players to look for
  * @param {*} in_duration maximum duration that the game can take
  * @param {*} in_minage minimum age requirement for game
- * @return {Array} game_list 
+ * @return {Array} list of Game objects
  */
 function find_games(in_numplayers, in_duration, in_minage) {
-    
-    // db columns
-    //'players_min','players_max','players_age','duration_min','duration_max'
 
-
-    // find games that match the limits set in parameters
-    return new Promise( function(resolve,reject){
-        local_game_db.find({
-            selector: {
-                players_min: {$lte: in_numplayers}
-                ,players_max: {$gte: in_numplayers}
-                ,players_age: {$lte: in_minage}
-                ,duration_max: {$lte: in_duration}
-            }
-        }).then(function (result) {
-            
-            var tmp_results = [];
-
-            Promise.all(result.docs.map(function(doc) {
-                tmp_results.push(doc);
-            })).then(function(eh){
-                resolve(tmp_results);
-            });
-            
-        }).catch(function(){
-            //console.log.bind(console)
-            console.log('db lookup error');
-            reject("Gamedb lookup error?");
-        });
+    return get_games_from_db({
+        players_min: {$lte: in_numplayers}
+        ,players_max: {$gte: in_numplayers}
+        ,players_age: {$lte: in_minage}
+        ,duration_max: {$lte: in_duration}
     });
 }
 
-
+/** 
+ * Return full list of games in local db
+ */
 function get_all_games() {
-
-    // find games that match the limits set in parameters
-    return new Promise( function(resolve,reject){
-
-        local_game_db.createIndex({
-            index: {fields: ['title']}
-        }).then(function(){
-
-            return local_game_db.find({
-                selector: {
-                    title: {$exists: true}
-                },
-                attachments: true,
-                sort: ['title']
-            })
-        }).then(function (result) {
-            
-            var tmp_results = []
-
-            Promise.all(result.docs.map(function(doc) {
-                tmp_results.push(doc);
-            })).then(function(eh){
-                resolve(tmp_results)
-            });
-            
-        }).catch(function(error){
-            //console.log.bind(console)
-            console.log('db lookup error',error)
-            reject("Gamedb lookup error?")
-        });
+    
+    return get_games_from_db({
+        title: {$exists: true}
     });
 }
+
+/**
+ * Return list of games from the databased, based on selector
+ *
+ * @param {*} selector_in any pouchdb selector
+ * @returns list of documents from local pouchdb instance
+ */
+// TODO: sorting
+function get_games_from_db(selector_in) {
+
+    return local_game_db.find({
+        selector: selector_in
+    }).then(function (result) {
+        
+        var tmp_results = [];
+
+        // loop over all results and create Game objects for them
+        // TODO: is push with separate array needed?
+        result.docs.map(function(doc) {
+            //return doc;
+            tmp_results.push(doc);
+        })
+
+        return tmp_results;
+
+    }).catch(function(error){
+        // if something goes wrong, just print the error for now and return an empty list
+        console.error("Something bad happened", error);
+        return [];
+    });
+}
+
+
 
 
 /**

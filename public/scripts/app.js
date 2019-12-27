@@ -23,7 +23,6 @@ function get_game_list(e) {
     if (e.preventDefault) e.preventDefault();
 
     // find the value field in the forms
-    //var tmp_form_inputs = e.target.getElementsByTagName('input');
     var player_num = parseInt($('#roll_player_num').val());
     var player_age_min = parseInt($('#roll_player_age_min').val());
     var duration_max = parseInt($('#roll_duration_max').val());
@@ -124,7 +123,7 @@ function navigate_to(event) {
     var newpage_id = event.data['page_id'];
 
     // TODO: move to appropriate place?
-    generate_all_cards();
+    //generate_all_cards();
 
     // TODO: some animation
 
@@ -148,7 +147,7 @@ function navigate_to(event) {
  * 
  * @param {*} game_doc
  */
-function generate_game_card(game_doc)
+function generate_game_card_old(game_doc)
 {
     //console.log(game_doc);
 
@@ -193,7 +192,6 @@ function generate_all_cards() {
 
             if(game_list_full.length > 0) {
 
-
                 game_list_full.forEach(game_doc => {
                     var new_card = generate_game_card(game_doc);
                     new_card.show();
@@ -230,7 +228,11 @@ function open_game_popup(event) {
 
 function close_game_popup(event) {
 
-    $('#add_game_overlay').hide()
+    $('#add_game_overlay').hide();
+    $('#add_game_screen').hide();
+    $('#screen_search_bgg').hide();
+    $('#screen_bgg_details').hide();
+    $('#delete_game_screen').hide();
 }
 
 function add_game_to_lib(e) {
@@ -238,13 +240,13 @@ function add_game_to_lib(e) {
     // prevent default form (redirectish) behavior
     if (e.preventDefault) e.preventDefault();
 
-    // check if URL is defined, otherwise make it empy
+    // check if URL is defined, otherwise make it empty
     var image_url = $('#newgame_image').attr('src');
     if (image_url == MISSING_COVER_IMAGE) {
         image_url = "";
     }
     
-    add_game(
+    game_db_add(
         -1,
         $('#newgame_title').val(),
         $('#newgame_players_min').val(),
@@ -255,7 +257,7 @@ function add_game_to_lib(e) {
         image_url
     );
 
-    generate_all_cards();
+    //generate_all_cards();
     close_game_popup();
 
     return false;
@@ -267,6 +269,7 @@ function open_search_bgg() {
 
     // reset search form;
     $('#search_term').val('');
+    $('#search_game_results').html('');
 
     $('#screen_search_bgg').show()
 }
@@ -510,6 +513,57 @@ $(document).ready(function() {
 
     generate_all_cards();
 });
+
+function open_game_edit(event) {
+    // TODO: merge with add game UI path
+
+    var local_game = event.data['game'];
+
+    fill_game_edit_screen(local_game);
+
+    // show the overlay and screen
+    $('#add_game_overlay').show();
+    $('#add_game_screen').show();
+}
+
+/** 
+ * Open delete confirmgame_db_deletetion screen 
+ */
+function open_game_delete(event) {
+
+
+    var local_game = event.data['game'];
+
+    $('#add_game_overlay').show();
+    $('#delete_game_screen .delete_game_text').html(local_game['title'])
+    
+
+    // on confirming delete, send it to the database
+    $('#delete_game_screen .delete_game_confirm').on('click',function() {
+        
+        game_db_delete(local_game);
+        close_game_delete();
+    })
+
+    // TODO: only needs to be bound once?
+    $('#delete_game_screen .delete_game_cancel').on('click',function() {
+        close_game_delete();
+    })
+
+    $('#delete_game_screen').show();
+
+    
+}
+
+function close_game_delete() {
+
+    // clear the binds on the links
+    $('#delete_game_screen .delete_game_confirm').off();
+    $('#delete_game_screen .delete_game_cancel').off();
+
+    $('#add_game_overlay').hide();
+    $('#delete_game_screen').hide();
+}
 
 /**
  * Get random integer in inteval(incuding?)

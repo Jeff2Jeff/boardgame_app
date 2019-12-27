@@ -147,6 +147,15 @@
 
                     </div>
                 </div>
+
+                <div id="delete_game_screen" class="game_add_panel">
+                    <div>Confirm delete:</div>
+                    <div class="delete_game_text">?</div>
+                    <div>
+                        <a class="delete_game_confirm">Yes</a>
+                        <a class="delete_game_cancel">No</a> 
+                    </div>
+                </div>
                 
             </div>
 
@@ -159,7 +168,6 @@
 
             <div id="game_selection" class="mainscreen">
 
-                <!--<div class="game_roll_form"></div>-->
                 <div class="content_centerer container_flexflow">
                     <div class="content_block game_roll_form">
                         <form id="roll_form" autocomplete="off">
@@ -202,7 +210,14 @@
         <!-- template for game record in management screen -->
         <template id="game_record_template">
             <div class="game_record">
-                <div class="game_record_title">?</div>
+                <div>
+                    <a class="game_edit">E</a>
+                    <a class="game_delete">X</a>
+                </div>
+                <div>
+                    <span class="game_record_title">?</span>
+
+                </div>
                 <div class="game_record_info">
                     <img class="game_cover" src="/images/game_box_missing.jpg">
                     <div>
