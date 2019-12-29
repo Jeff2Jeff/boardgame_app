@@ -2,12 +2,14 @@
 
 const local_game_db = new PouchDB('gamedb_local');
 
+// TODO: I dn't think this is needed here...
 local_game_db.createIndex({
     index: {
       fields: ['title']
     }
   })
 
+// TODO: this gives jittery results, let's see if we can make this trigger less often?
 local_game_db.changes({ 
     live: true,
     include_docs: true
@@ -21,6 +23,7 @@ local_game_db.changes({
 
 // TODO: thumbnail url and image url for different screens
 
+// TODO: update doc
 /**
  * Add a game to the local_game_db
  *
@@ -32,53 +35,22 @@ local_game_db.changes({
  * @param {*} in_time_min minimum playtime in minutes (recommended)
  * @param {*} in_time_max maximum playtime in minutes (recommended)
  */
-function game_db_add (
-            in_bgg_id, in_title
-            , in_players_min, in_players_max, in_players_age
-            , in_time_min, in_time_max
-            , in_imageurl = null
-            )
-{
-
-    var newgame = {
-        //_id: new Date().toISOString(),
-        id_bgg: in_bgg_id
-        , title: in_title
-        , players_min: parseInt(in_players_min)
-        , players_max: parseInt(in_players_max)
-        , players_age: parseInt(in_players_age)
-        , duration_min: parseInt(in_time_min)
-        , duration_max: parseInt(in_time_max)
-        , remote_image_url: in_imageurl
-    };
-
+function game_db_add (newgame) {
 
     local_game_db.post(newgame).then(function(response) {
         
         //resolve(response);
+        // nothing?
 
     }).catch(function(error){
         console.log(error);
     })    
 }
 
-function game_db_edit(game_doc,
-            in_bgg_id, in_title
-            , in_players_min, in_players_max, in_players_age
-            , in_time_min, in_time_max
-            , in_imageurl = null
-            ) {
+// TODO: docstring
+function game_db_edit(updated_game) {
 
-    // TODO: support more edits
-    game_doc['title'] = in_title;
-    game_doc['players_min'] = parseInt(in_players_min);
-    game_doc['players_max'] = parseInt(in_players_max);
-    game_doc['players_age'] = parseInt(in_players_age);
-    game_doc['duration_min'] = parseInt(in_time_min);
-    game_doc['duration_max'] = parseInt(in_time_max);
-    game_doc['remote_image_url'] = in_imageurl;
-
-    local_game_db.put(game_doc).then(function(response) {
+    local_game_db.put(updated_game).then(function(response) {
         console.log(response);
 
     }).catch(function(error){
@@ -156,7 +128,7 @@ function get_games_from_db(selector_in) {
             // TODO: is push with separate array needed?
             result.docs.map(function(doc) {
                 //return doc;
-                tmp_results.push(doc);
+                tmp_results.push(new GameDoc(doc));
             })
 
             return tmp_results;

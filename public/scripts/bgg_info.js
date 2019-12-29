@@ -25,66 +25,54 @@ function get_bgg_data(bgg_id) {
             
         }).then(function(response_text) {
             
-            // TODO: move 'item' parsing stuff info separate function and make recursive
+            // TODO: move 'item' parsing stuff info separate function and make recursive?
             
-            // parse XML into custom struct
-            var response_struct = {};
-
             // parse response xml
             var response_xml = $($.parseXML(response_text));
             
             // info the from the main game
             var main_game_xml = response_xml.find('items>item')
 
-            // general game info
-            response_struct['id_bgg'] = parseInt(main_game_xml.attr('id'));
-            response_struct['players_min'] = parseInt(main_game_xml.find('minplayers').first().attr('value'));
-            response_struct['players_max'] = parseInt(main_game_xml.find('maxplayers').first().attr('value'));
-            response_struct['players_age'] = parseInt(main_game_xml.find('minage').first().attr('value'));
-            response_struct['duration_min'] = parseInt(main_game_xml.find('minplaytime').first().attr('value'));
-            response_struct['duration_max'] = parseInt(main_game_xml.find('maxplaytime').first().attr('value'));
+            // general game info in a gamedoc struct
+            var response_game = new GameDoc({
+                bgg_id: parseInt(main_game_xml.attr('id')),
+                players_min: parseInt(main_game_xml.find('minplayers').first().attr('value')),
+                players_max: parseInt(main_game_xml.find('maxplayers').first().attr('value')),
+                players_age: parseInt(main_game_xml.find('minage').first().attr('value')),
+                duration_min: parseInt(main_game_xml.find('minplaytime').first().attr('value')),
+                duration_max: parseInt(main_game_xml.find('maxplaytime').first().attr('value')),
+
+                title: main_game_xml.find('name[type=primary]').first().attr('value'),
+                cover_image_url: main_game_xml.find('image').first().text(),
+                cover_thumbnail_url: main_game_xml.find('thumbnail').first().text(),
+            });
 
             // title data
-            response_struct['title'] = main_game_xml.find('name[type=primary]').first().attr('value');
-            response_struct['title_alts'] = [];
-            
+            response_game['bgg_altnames'] = [];
             main_game_xml.find('name[type|=alternate]')
                 .each(function(index) {
-                    response_struct['title_alts'].push($(this).attr('value'))
+                    response_game['bgg_altnames'].push($(this).attr('value'))
             });
 
             // version data
-            response_struct['versions'] = [];
+            response_game['bgg_versions'] = [];
             main_game_xml.find('versions>item')
                 .each(function(index) {
 
                     var version_struct = {};
 
-                    version_struct['image_url'] = $(this).find('thumbnail').first().text();
+                    version_struct['thumbnail_url'] = $(this).find('thumbnail').first().text();
+                    version_struct['image_url'] = $(this).find('image').first().text();
                     version_struct['title'] = $(this).find('name[type=primary]').first().attr('value');
                     version_struct['year'] = $(this).find('yearpublished').first().attr('value');
                     version_struct['language'] = $(this).find('link[type=language]').first().attr('value');
 
-                    response_struct['versions'].push(version_struct);
+                    response_game['bgg_versions'].push(version_struct);
             });
             
-            // image stuff
-            response_struct['image_url'] = main_game_xml.find('thumbnail').first().text();
-//            response_struct['image_blob'] = convertImgToBlob(response_struct['image_url']);
+            // return the game_object with all info that could be found
+            resolve(response_game);
             
-            // convertImgToBlob(response_struct['image_url']).then(function(blob) {
-                
-            //     // store blob in struct
-            //     response_struct['image_blob'] = blob;
-
-            // }, function(err) {
-            //     console.log(err)
-            // });
-            
-            resolve(response_struct);
-            
-            //console.log(response_struct);
-
         }).catch(function(error) {
             console.log("got error");
             console.log(error);

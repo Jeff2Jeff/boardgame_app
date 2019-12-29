@@ -1,8 +1,27 @@
 const MISSING_COVER_IMAGE = '/images/game_box_missing.jpg';
+const MISSING_COVER_THUMBNAIL = '/images/game_box_missing.jpg';
 
-// TODO: u
-function GameDoc() {
-    
+// Structure of a game, to make sure that all documents in 
+// and out of the database have a similar structure
+// TODO: use function
+function GameDoc(struct_in) {
+
+    this.bgg_id = !!struct_in.bgg_id ? struct_in.bgg_id : -1;
+    this.bgg_version = !!struct_in.bgg_version ? struct_in.bgg_version : "";
+    this.bgg_altname = !!struct_in.bgg_altname ? struct_in.bgg_altname : "";
+
+    this.title = !!struct_in.title ? struct_in.title : "Not specified";
+    this.cover_image_url = !!struct_in.cover_image_url && struct_in.cover_image_url != MISSING_COVER_IMAGE 
+                                ? struct_in.cover_image_url : "";
+    this.cover_thumbnail_url = !!struct_in.cover_thumbnail_url && struct_in.cover_thumbnail_url != MISSING_COVER_THUMBNAIL 
+                                ? struct_in.cover_thumbnail_url : "";
+
+    this.players_min = !!struct_in.players_min ? parseInt(struct_in.players_min) : 0;
+    this.players_max = !!struct_in.players_max ? Math.max(parseInt(struct_in.players_max),this.players_min) : this.players_min;
+    this.players_age = !!struct_in.players_age ? parseInt(struct_in.players_age) : 0;
+
+    this.duration_min = !!struct_in.duration_min ? parseInt(struct_in.duration_min) : 0;
+    this.duration_max = !!struct_in.duration_max ? Math.max(parseInt(struct_in.duration_max),this.duration_min) : this.duration_min;
 }
 
 /**
@@ -54,6 +73,8 @@ function generate_game_card(game_doc) {
     return result_element;
 }
 
+// TODO: docstring
+// fill in fields of the add/edit game screen, based on provided document
 function fill_game_edit_screen(game_doc) {
 
     result_element = $('#add_game_form');
@@ -65,6 +86,9 @@ function fill_game_edit_screen(game_doc) {
     result_element.find('#newgame_players_min').val(game_doc['players_min'])
     result_element.find('#newgame_players_max').val(game_doc['players_max'])
     result_element.find('#newgame_players_age').val(game_doc['players_age'])
+
+    $('#add_game_form').off();
+    $('#add_game_form').on('submit',data={'game_doc':game_doc},add_game_to_lib);
 
 }
 

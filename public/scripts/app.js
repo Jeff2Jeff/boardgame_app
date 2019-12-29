@@ -92,13 +92,11 @@ function roll_for_game() {
             var selected_game = game_pick_list.splice(selected_index, 1)[0]
             
             // some logging
-            console.log(game_pick_list)
-            console.log(selected_game)
-            console.log(gamelist_length_initial, selected_index, selected_game['title'])
+            //console.log(game_pick_list)
+            //console.log(selected_game)
+            //console.log(gamelist_length_initial, selected_index, selected_game['title'])
 
-            var image_url = selected_game['remote_image_url'];
-            image_url = (image_url !== undefined & image_url.length > 0) ?
-                                image_url : MISSING_COVER_IMAGE;
+            var image_url = get_image_url(selected_game);
 
             // show the result on screen
             $('#roll_result_title').html('"' + selected_game['title'] + '"');
@@ -236,42 +234,36 @@ function add_game_to_lib(e) {
 
     // prevent default form (redirectish) behavior
     if (e.preventDefault) e.preventDefault();
+    
+    // any potential game that's passed when opening the form
+    var local_game = e.data['game_doc'];
+    
+    var tmp_new_game = new GameDoc({
+        bgg_id: local_game ? local_game.bgg_id : undefined,
+        bgg_version: local_game ? local_game.bgg_version : undefined,
+        bgg_altname: local_game ? local_game.bgg_altname : undefined,
+        title: $('#newgame_title').val(),
+        cover_image_url: local_game ? local_game.cover_image_url : undefined,
+        cover_thumbnail_url: local_game ? local_game.cover_thumbnail_url : undefined,
+        players_min: $('#newgame_players_min').val(),
+        players_max: $('#newgame_players_max').val(),
+        players_age: $('#newgame_players_age').val(),
+        duration_min: $('#newgame_duration_min').val(),
+        duration_max: $('#newgame_duration_max').val()
+    });
 
-    // check if URL is defined, otherwise make it empty
-    var image_url = $('#newgame_image').attr('src');
-    if (image_url == MISSING_COVER_IMAGE) {
-        image_url = "";
+    // id this is an edit, we'll have passed a local game with _id and _rev db info
+    tmp_new_game._id = local_game ? local_game._id : undefined;
+    tmp_new_game._rev = local_game ? local_game._rev : undefined;
+    
+    // if a game was provided, treat this as an edit, else as an add
+    // TODO: maybe move this to db code section?
+    if(!!tmp_new_game._id && !!tmp_new_game._id) {
+        game_db_edit(tmp_new_game);
+    } else {
+        game_db_add(tmp_new_game);
     }
     
-    // if a game was provided, treat this as an edit
-    var local_game = e.data['game_doc'];
-    if(local_game) {
-        game_db_edit(local_game,
-            -1,
-            $('#newgame_title').val(),
-            $('#newgame_players_min').val(),
-            $('#newgame_players_max').val(),
-            $('#newgame_players_age').val(),
-            $('#newgame_duration_min').val(),
-            $('#newgame_duration_max').val(),
-            image_url
-            );
-    } else {
-        game_db_add(
-            -1,
-            $('#newgame_title').val(),
-            $('#newgame_players_min').val(),
-            $('#newgame_players_max').val(),
-            $('#newgame_players_age').val(),
-            $('#newgame_duration_min').val(),
-            $('#newgame_duration_max').val(),
-            image_url
-        );
-    }
-
-
-
-    //generate_all_cards();
     close_game_popup();
 
     return false;
@@ -338,11 +330,11 @@ function expand_search_result(event) {
     var bgg_id_lookup = event.data['bgg_id'];
 
     // lookup the id on BoardGameGeeks, then update show the details screen
-    get_bgg_data(bgg_id_lookup).then(function(resolve, reject){
+    get_bgg_data(bgg_id_lookup).then(function(result){
         
         $('#screen_search_bgg').hide();
 
-        bgg_details_game = resolve;
+        bgg_details_game = result;
 
         $('#bgg_details_title').html(bgg_details_game['title']);
         
@@ -360,7 +352,7 @@ function expand_search_result(event) {
         $('#bgg_details_altnames').append(tmp_html);
 
         // add any other alt names
-        bgg_details_game['title_alts'].forEach(function(title_alt) {
+        bgg_details_game['bgg_altnames'].forEach(function(title_alt) {
             $('#bgg_details_altnames').append(gethtml_bgg_altname(title_alt));
         });
 
@@ -374,8 +366,45 @@ function expand_search_result(event) {
         $('#bgg_details_versions').append(tmp_html);
 
         // add any other versions as well
-        bgg_details_game['versions'].forEach(function(version) {
+        bgg_details_game['bgg_versions'].forEach(function(version) {
             $('#bgg_details_versions').append(gethtml_bgg_version(version));
+        });
+
+        // update the eventhandler so that the 'select' game 
+        // reads out the form with selected bgg details
+        $('#bgg_details_select').off();
+        $('#bgg_details_select').on('click',function(event){
+
+            $('#screen_bgg_details').hide();
+            
+            // TODO :read version etc.
+            // TODO: version image and thumbnail tracking...
+
+            fill_game_edit_screen(bgg_details_game);
+
+            // show the updated add game screen
+            $('#add_game_screen').show()
+
+            
+                // // check if URL is defined, use default if it isn't
+                // var image_url = bgg_details_game['selected_version']['image_url'];
+                // image_url = (image_url !== undefined & image_url.length > 0) ?
+                //                     image_url : '/images/game_box_missing.jpg'
+            
+                // // fill the details into the 'add game' screen
+                // $('#newgame_title').val(bgg_details_game['selected_altname']);
+                // $('#newgame_image').attr('src',image_url);
+                // $('#newgame_players_min').val(bgg_details_game['players_min']);
+                // $('#newgame_players_max').val(bgg_details_game['players_max']);
+                // $('#newgame_players_age').val(bgg_details_game['players_age']);
+                // $('#newgame_duration_min').val(bgg_details_game['duration_min']);
+                // $('#newgame_duration_max').val(bgg_details_game['duration_max']);
+                
+                // TODO: track bgg_id
+            
+                // show the updated add game screen
+                $('#add_game_screen').show()
+            }
         });
 
         $('#screen_bgg_details').show();
@@ -427,7 +456,8 @@ function select_bgg_altname(event) {
 function  gethtml_bgg_version(in_version) {
 
     // check if URL is defined, use default if it isn't
-    var image_url = in_version['image_url'];
+    
+    var image_url = !!in_version['image_url'] ? in_version['image_url']:"";
     image_url = (image_url !== undefined & image_url.length > 0) ?
                         image_url : '/images/game_box_missing.jpg'
 
@@ -455,31 +485,36 @@ function select_bgg_version(event) {
 /** 
  * Accept the data from the BGG details screen, and use it to fill the bgg add screen
  */
-function select_details_bgg(event) {
+// function select_details_bgg(event) {
 
-    console.log(bgg_details_game);
+//     console.log(bgg_details_game);
 
-    $('#screen_bgg_details').hide();
+ 
+//     var local_game = event.data.game_doc;
+
+//     $('#screen_bgg_details').hide();
     
-    // check if URL is defined, use default if it isn't
-    var image_url = bgg_details_game['selected_version']['image_url'];
-    image_url = (image_url !== undefined & image_url.length > 0) ?
-                        image_url : '/images/game_box_missing.jpg'
+//     fill_game_edit_screen(local_game);
 
-    // fill the details into the 'add game' screen
-    $('#newgame_title').val(bgg_details_game['selected_altname']);
-    $('#newgame_image').attr('src',image_url);
-    $('#newgame_players_min').val(bgg_details_game['players_min']);
-    $('#newgame_players_max').val(bgg_details_game['players_max']);
-    $('#newgame_players_age').val(bgg_details_game['players_age']);
-    $('#newgame_duration_min').val(bgg_details_game['duration_min']);
-    $('#newgame_duration_max').val(bgg_details_game['duration_max']);
+//     // // check if URL is defined, use default if it isn't
+//     // var image_url = bgg_details_game['selected_version']['image_url'];
+//     // image_url = (image_url !== undefined & image_url.length > 0) ?
+//     //                     image_url : '/images/game_box_missing.jpg'
+
+//     // // fill the details into the 'add game' screen
+//     // $('#newgame_title').val(bgg_details_game['selected_altname']);
+//     // $('#newgame_image').attr('src',image_url);
+//     // $('#newgame_players_min').val(bgg_details_game['players_min']);
+//     // $('#newgame_players_max').val(bgg_details_game['players_max']);
+//     // $('#newgame_players_age').val(bgg_details_game['players_age']);
+//     // $('#newgame_duration_min').val(bgg_details_game['duration_min']);
+//     // $('#newgame_duration_max').val(bgg_details_game['duration_max']);
     
-    // TODO: track bgg_id
+//     // TODO: track bgg_id
 
-    // show the updated add game screen
-    $('#add_game_screen').show()
-}
+//     // show the updated add game screen
+//     $('#add_game_screen').show()
+// }
 
 
 function open_game_edit(event) {
@@ -491,9 +526,7 @@ function open_game_edit(event) {
 
     // update the add game button to be for editing
     $('#newgame_submit').html('Save changes');
-    $('#add_game_form').off();
-    $('#add_game_form').on('submit',data={'game_doc':local_game},add_game_to_lib);
-
+    
     // hide the search BGG button
     // TODO: maybe the search bgg is still fine for editing...
     $('#add_game_searchbgg').hide();
@@ -591,7 +624,7 @@ $(document).ready(function() {
     $("#search_game_form").submit(form_search_bgg);
     $('#search_game_close').on('click',close_search_bgg);
     
-    $('#bgg_details_select').on('click',select_details_bgg);
+    //$('#bgg_details_select').on('click',select_details_bgg);
     $('#bgg_details_close').on('click',close_details_bgg);
 
     $('#game_list_export').on('click',game_list_export);
