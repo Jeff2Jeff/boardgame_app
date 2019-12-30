@@ -338,7 +338,7 @@ function expand_search_result(event) {
 
         $('#bgg_details_title').html(bgg_details_game['title']);
         
-        $('#bgg_details_cover').attr('src',bgg_details_game['image_url']);
+        $('#bgg_details_cover').attr('src',bgg_details_game['cover_thumbnail_url']);
         $('#bgg_details_players_min').html(bgg_details_game['players_min']);
         $('#bgg_details_players_max').html(bgg_details_game['players_max']);
         $('#bgg_details_age_min').html(bgg_details_game['players_age']);
@@ -358,10 +358,8 @@ function expand_search_result(event) {
 
         // add main version as first version
         $('#bgg_details_versions').html('');
-        var tmp_html = gethtml_bgg_version({
-            title:bgg_details_game['title'],
-            image_url:bgg_details_game['image_url']
-        });
+        var tmp_html = gethtml_bgg_version(bgg_details_game);
+
         tmp_html.trigger('click');
         $('#bgg_details_versions').append(tmp_html);
 
@@ -384,27 +382,6 @@ function expand_search_result(event) {
 
             // show the updated add game screen
             $('#add_game_screen').show()
-
-            
-                // // check if URL is defined, use default if it isn't
-                // var image_url = bgg_details_game['selected_version']['image_url'];
-                // image_url = (image_url !== undefined & image_url.length > 0) ?
-                //                     image_url : '/images/game_box_missing.jpg'
-            
-                // // fill the details into the 'add game' screen
-                // $('#newgame_title').val(bgg_details_game['selected_altname']);
-                // $('#newgame_image').attr('src',image_url);
-                // $('#newgame_players_min').val(bgg_details_game['players_min']);
-                // $('#newgame_players_max').val(bgg_details_game['players_max']);
-                // $('#newgame_players_age').val(bgg_details_game['players_age']);
-                // $('#newgame_duration_min').val(bgg_details_game['duration_min']);
-                // $('#newgame_duration_max').val(bgg_details_game['duration_max']);
-                
-                // TODO: track bgg_id
-            
-                // show the updated add game screen
-                $('#add_game_screen').show()
-            }
         });
 
         $('#screen_bgg_details').show();
@@ -456,13 +433,11 @@ function select_bgg_altname(event) {
 function  gethtml_bgg_version(in_version) {
 
     // check if URL is defined, use default if it isn't
+
     
-    var image_url = !!in_version['image_url'] ? in_version['image_url']:"";
-    image_url = (image_url !== undefined & image_url.length > 0) ?
-                        image_url : '/images/game_box_missing.jpg'
 
     var tmp_html = $('<a></a>');
-    tmp_html.append('<img src="' + image_url + '">')
+    tmp_html.append('<img src="' + get_image_url(in_version, true) + '">')
     tmp_html.append('<span>' + in_version['title'] + '</span>')
     tmp_html.attr('class','details_screen_notselected');
     tmp_html.on('click',{selected_version: in_version},select_bgg_version);
@@ -601,9 +576,6 @@ $(document).ready(function() {
 
     /** gameroll stuff  */
 
-    // form submitted to roll for a game
-    //$("#roll_form").submit(get_game_list);
-
     // reroll without updating filters
     $('#button_reroll').on('click',roll_for_game);
     // close all results and get access to the form again
@@ -615,7 +587,6 @@ $(document).ready(function() {
     $('#button_play').on('click',close_results);
 
     /** game management stuff */
-    //$('#game_record_template').hide();
     $('#add_game').on('click',open_game_popup);
     $('#add_game_close').on('click',close_game_popup);
 
@@ -641,34 +612,46 @@ $(document).ready(function() {
         }
     });
 
-    // test rolling stuff
+    // respond to device motion when rolling for games
     if (window.DeviceMotionEvent) {
         window.addEventListener('devicemotion', repond_to_shaking);
         will_respond_to_shaking = true;
     }
-      
 
-    // initial page of the app
+    // navigate to initial page of the app
     $('#app_menu_games').trigger('click');
-    //$('#app_menu_roll').trigger('click');
 
+    // populate game list
     generate_all_cards();
+
+    // start listening to db and refresh list on changes
+    local_game_db.changes({ 
+        live: true,
+        since: 'now',
+        include_docs: true
+    }).on('change', function (change) {
+        console.log('changes!',change);
+        generate_all_cards();
+    });
 });
 
 
+/**
+ * event handler for responding to device shaking events
+ *
+ * @param {DeviceMotionEvent} event motion event
+ */
+function repond_to_shaking(event) {
 
-function repond_to_shaking(evt) {
-
-    var tmp_x = evt.acceleration.x;
-    var tmp_y = evt.acceleration.x;
-    var tmp_z = evt.acceleration.x;
+    // compute total acceleration vector size
+    var tmp_x = event.acceleration.x;
+    var tmp_y = event.acceleration.x;
+    var tmp_z = event.acceleration.x;
     var tmp_total = Math.sqrt(tmp_x*tmp_x + tmp_y * tmp_y + tmp_z * tmp_z);
     
-    //TODO: tweak shaking repsoniveness
+    // trigger response to shaking
     if(will_respond_to_shaking && tmp_total > 20) {
-        // do the shaking things
-        //alert('shake!');
-
+        
         if(shake_from_main) {
             $('#roll_submit').click();
         }
@@ -677,10 +660,7 @@ function repond_to_shaking(evt) {
             $('#button_reroll').click();
         }
         
-        //$('#roll_submit').click();
-
+        // after responding, the rest of the app will determine when to respond again
         will_respond_to_shaking = false;
-        //e.target.removeEventListener('devicemotion');
-        //setTimeout(function(){will_respond_to_shaking = true},2000);
     }
 }

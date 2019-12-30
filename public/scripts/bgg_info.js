@@ -59,15 +59,20 @@ function get_bgg_data(bgg_id) {
             main_game_xml.find('versions>item')
                 .each(function(index) {
 
-                    var version_struct = {};
+                    // treat each version as a game
+                    var version_game = new GameDoc(
+                        {
+                            title: $(this).find('name[type=primary]').first().attr('value'),
+                            cover_image_url: $(this).find('image').first().text(),
+                            cover_thumbnail_url: $(this).find('thumbnail').first().text()
+                        }
+                    );
 
-                    version_struct['thumbnail_url'] = $(this).find('thumbnail').first().text();
-                    version_struct['image_url'] = $(this).find('image').first().text();
-                    version_struct['title'] = $(this).find('name[type=primary]').first().attr('value');
-                    version_struct['year'] = $(this).find('yearpublished').first().attr('value');
-                    version_struct['language'] = $(this).find('link[type=language]').first().attr('value');
+                    // some additional info (not really used yet?)
+                    version_game['year'] = $(this).find('yearpublished').first().attr('value');
+                    version_game['language'] = $(this).find('link[type=language]').first().attr('value');
 
-                    response_game['bgg_versions'].push(version_struct);
+                    response_game['bgg_versions'].push(version_game);
             });
             
             // return the game_object with all info that could be found

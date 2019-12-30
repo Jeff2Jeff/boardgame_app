@@ -30,11 +30,13 @@ function GameDoc(struct_in) {
  * @param {*} game_doc start url
  * @returns either the start url, or the default url
  */
-function get_image_url(game_doc) {
-    var image_url = game_doc['remote_image_url'];
+function get_image_url(game_doc, use_thumbnail) {
+
+    var local_img_url = use_thumbnail ? game_doc['cover_thumbnail_url'] : game_doc['cover_image_url'];
+    var local_img_default = use_thumbnail ? MISSING_COVER_THUMBNAIL : MISSING_COVER_IMAGE;
     
-    return (image_url != null && image_url !== undefined && image_url.length > 0) ?
-                        image_url : MISSING_COVER_IMAGE;
+    return (local_img_url != null && local_img_url !== undefined && local_img_url.length > 0) ?
+        local_img_url : local_img_default;
 }
 
 /**

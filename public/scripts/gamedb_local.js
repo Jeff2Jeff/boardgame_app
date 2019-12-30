@@ -2,25 +2,6 @@
 
 const local_game_db = new PouchDB('gamedb_local');
 
-// TODO: I dn't think this is needed here...
-local_game_db.createIndex({
-    index: {
-      fields: ['title']
-    }
-  })
-
-// TODO: this gives jittery results, let's see if we can make this trigger less often?
-local_game_db.changes({ 
-    live: true,
-    include_docs: true
-  }).on('change', function (change) {
-    generate_all_cards();
-    // if (change.doc && change.doc.model === 'note') {
-    //   console.log(change);
-    // }
-  });
-
-
 // TODO: thumbnail url and image url for different screens
 
 // TODO: update doc
@@ -51,10 +32,10 @@ function game_db_add (newgame) {
 function game_db_edit(updated_game) {
 
     local_game_db.put(updated_game).then(function(response) {
-        console.log(response);
+        //console.log(response);
 
     }).catch(function(error){
-        console.log(error);
+        console.log('de edit',error);
     })    
 }
 
@@ -128,7 +109,11 @@ function get_games_from_db(selector_in) {
             // TODO: is push with separate array needed?
             result.docs.map(function(doc) {
                 //return doc;
-                tmp_results.push(new GameDoc(doc));
+                var tmp_gamedoc = new GameDoc(doc);
+                tmp_gamedoc['_id'] = doc['_id'];
+                tmp_gamedoc['_rev'] = doc['_rev'];
+
+                tmp_results.push(tmp_gamedoc);
             })
 
             return tmp_results;
