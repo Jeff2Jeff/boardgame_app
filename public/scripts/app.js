@@ -6,74 +6,69 @@ var shake_from_main = true;
 // TODO: add error handling
 
 // global variable of game shortlist that's adjusted based on user input
-var game_pick_list = [];
 
-var active_page_id = '';
+//var game_pick_list = [];
+
+//var active_page_id = '';
 
 
-var bgg_details_game = {};
+//var bgg_details_game = {};
 
 
 /**
  * Start up a new game roll 'session'
- * Local DB interaction goes here
  */
-function get_game_list(e) {
-
-    will_respond_to_shaking = false;
-
-    // prevent default form (redirectish) behavior
-    if (e.preventDefault) e.preventDefault();
-
-    // find the value field in the forms
-    var player_num = parseInt($('#roll_player_num').val());
-    var player_age_min = parseInt($('#roll_player_age_min').val());
-    var duration_max = parseInt($('#roll_duration_max').val());
+function init_roll_for_game() {
     
-    // TODO: check values integrity? (Note: should also already be done by form...)
+    // check the form with search parameters (browser handles feedback)
+    // TODO: test on multiple modern browsers
+    var roll_form_element = $("#roll_form")[0];
+    roll_form_element.reportValidity();
 
-    // look for the games in the local db, store then in the global list
-    // and continue with rolling
-    find_games(player_num,duration_max, player_age_min).then(
-        function(game_search_result) {
+    // if valid values are entered, continue with processing
+    if (roll_form_element.checkValidity()) {
+
+        // find the value field in the forms
+        var player_num = parseInt($('#roll_player_num').val());
+        var player_age_min = parseInt($('#roll_player_age_min').val());
+        var duration_max = parseInt($('#roll_duration_max').val());
+        
+        // look for the games in the local db, store then in the global list
+        // and continue with rolling
+        find_games(player_num, duration_max, player_age_min)
+        .then(function(game_search_result) {
 
             // copy to local list of games
-            game_pick_list = game_search_result.slice();
+            var game_pick_list = game_search_result.slice();
 
-            roll_for_game();
+            roll_for_game(game_pick_list);
 
-    }).catch(function(error){
-        console.log('DB lookup error', error);
-    });
-
-    // return false to prevent the default form behavior
-    return false;
+        }).catch(function(error){
+            console.log('DB lookup error', error);
+        });
+    }
 }
 
 /**
  * App interactions for selecting a game: will transition between 
  * screens and update the 'shortlist' of games based on user actions.
  */
-function roll_for_game() {
+function roll_for_game(game_pick_list) {
 
+    // don't respond to shaking while rolling,
+    // flag will be updated by roll result code
     will_respond_to_shaking = false;
 
-    // show generic overlay that disables the form
-    $('#roll_overlay').show();
+    // first show the selection loading panel
+    navigate_overlay('#roll_animation_panel');
     
-    // show game_roll spinner and hide every of the other outcomes
-    $('#roll_animation_panel').show();
-    $('#roll_result_panel').hide();
-    $('#roll_nogame_panel').hide()
-    
-    setTimeout( function() {
+    // show results with some delay
+    setTimeout(function() {
         
-        // always hide the animation
-        $('#roll_animation_panel').hide()
-
         // if any results were found, continue to pick one
         if(game_pick_list.length > 0) {
             
+            // respond to shaking (reroll) only if there are games left on the picklist
             if(game_pick_list.length > 1) {
                 shake_from_main = false;
                 will_respond_to_shaking = true;
@@ -82,38 +77,33 @@ function roll_for_game() {
                 will_respond_to_shaking = false;
             }
             
-            //$('#roll_overlay').prepend($('<div>' + shake_from_main + '</div>'))
-
+            // take a random game from the list as the picked game
             var gamelist_length_initial = game_pick_list.length;
             var selected_index = randomIntFromInterval(0, gamelist_length_initial - 1);
-            //selected_game = game_pick_list[selected_index];
-            
-            // update list of selected games so that the currently roled on isn't in it anymore
             var selected_game = game_pick_list.splice(selected_index, 1)[0]
             
-            // some logging
-            //console.log(game_pick_list)
-            //console.log(selected_game)
-            //console.log(gamelist_length_initial, selected_index, selected_game['title'])
-
-            var image_url = get_image_url(selected_game);
-
             // show the result on screen
-            $('#roll_result_title').html('"' + selected_game['title'] + '"');
-            $('#roll_result_img').attr('src',image_url);
+            // TODO: move to some sort of 'fill' function?
+            $('#roll_result_title').html(selected_game['title']);
+            $('#roll_result_img').attr('src', get_image_url(selected_game,true));
             $('#roll_result_length').html(gamelist_length_initial);
-            $('#roll_result_panel').show();
 
+            
+            //$('#button_reroll').attr("disabled", gamelist_length_initial == 1);
+            
             // disable the reroll button if there's only one game left
-            $('#button_reroll').attr("disabled", gamelist_length_initial == 1);
+            // TODO: styling of button in this situation
+            $('#button_reroll').off()
+            if(game_pick_list.length > 0) {
+                // rebind the reroll button to pass the shortened list of games on
+                $('#button_reroll').off().on('click',function(){roll_for_game(game_pick_list)});
+            }
+
+            // show the page
+            navigate_overlay('#roll_result_panel');
 
         } else {
-
-            console.log("No games were found")
-
-            // update panels: show the general 'no game found' screen
-            $('#roll_nogame_panel').show()
-            
+            navigate_overlay('#roll_nogame_panel');
         }
     }, 2000);
 }
@@ -122,23 +112,26 @@ function roll_for_game() {
  * Close all result panels again, and give user access to the main selection form again
  */
 function close_results() {
-    $('#roll_overlay').hide();
-    $('#roll_animation_panel').hide();
-    $('#roll_result_panel').hide();
-    $('#roll_nogame_panel').hide()
 
+    //navigate_mainscreen('#game_selection');
+    $('#app_menu_roll').trigger('click');
+    
     // testing device motion things
     will_respond_to_shaking = true;
     shake_from_main = true;
 }
 
 /**
- * Navigate to different page in the app
+ * Navigate the app to the new main screen
+ *
+ * @param {*} new_screen_id html id (#) of the new page
  */
-function navigate_to(event) {
+function navigate_mainscreen(event) {
 
-    
     var newpage_id = event.data['page_id'];
+
+    // always hide the overlay when navigating main screen
+    $('#screen_overlay').hide();
 
     // set only the newly navigate pages to 'active'
     $('#app_menu a').attr('class','');
@@ -146,20 +139,26 @@ function navigate_to(event) {
 
     // only respond to shaking when on the roll page
     will_respond_to_shaking = (newpage_id == '#game_selection');
-    
 
     // TODO: some animation?
 
-    // Hide currently active page
-    if($(active_page_id)) {
-        $(active_page_id).hide();
-    }
+    // Show only the active page
+    $('#screen_main').children('.mainscreen').hide();
+    $('#screen_main').children('.mainscreen' + newpage_id).show();
+}
 
-    // show new page and store reference
-    if($(newpage_id)) {
-        $(newpage_id).show();
-        active_page_id = newpage_id;
-    }
+/** Navigate main app to another screen */
+//function navigate_overlay(event) {
+function navigate_overlay(newpage_id) {
+    
+    //var newpage_id = event.data['page_id'];
+    
+    // always show the overlay when navigating main screen
+    $('#screen_overlay').show();
+
+    // Show only the active page
+    $('#screen_overlay').find('.overlay_screen').hide();
+    $('#screen_overlay').find('.overlay_screen' + newpage_id).show();
 }
 
 /**
@@ -193,91 +192,74 @@ function generate_all_cards() {
     });
 }
 
-
+// TODO: use generic function
 function open_game_popup(event) {
-
-    // fill fields for adding
-    $('#newgame_submit').html('Add game');
-    $('#add_game_form').off();
-    $('#add_game_form').on('submit',{'game_doc':null},add_game_to_lib);
-
-
+    
+    fill_game_edit_screen(null);
+    
+    $('#add_game_header').html('New game');
+    $('#new_game_submit').html('Add game');
     $('#add_game_searchbgg').show();
-    
 
-    // show the overlay and screen
-    $('#add_game_overlay').show();
-    $('#add_game_screen').show();
-    
-    // clear the form when the page first opens
-    // TODO: why doesn't reset work?
-    //$("#add_game_form")[0].reset();
-    $('#newgame_title').val('');
-    $('#newgame_image').attr('src',MISSING_COVER_IMAGE);
-    $('#newgame_players_min').val('');
-    $('#newgame_players_max').val('');
-    $('#newgame_duration_min').val('');
-    $('#newgame_duration_max').val('');
-    $('#newgame_players_age').val('');
+    navigate_overlay('#add_game_screen');
 }
 
 function close_game_popup(event) {
 
-    $('#add_game_overlay').hide();
-    $('#add_game_screen').hide();
-    $('#screen_search_bgg').hide();
-    $('#screen_bgg_details').hide();
-    $('#delete_game_screen').hide();
+    $('#app_menu_games').trigger('click');
 }
 
+// TODO: replace 'e' with localgame?
 function add_game_to_lib(e) {
 
-    // prevent default form (redirectish) behavior
-    if (e.preventDefault) e.preventDefault();
-    
-    // any potential game that's passed when opening the form
-    var local_game = e.data['game_doc'];
-    
-    var tmp_new_game = new GameDoc({
-        bgg_id: local_game ? local_game.bgg_id : undefined,
-        bgg_version: local_game ? local_game.bgg_version : undefined,
-        bgg_altname: local_game ? local_game.bgg_altname : undefined,
-        title: $('#newgame_title').val(),
-        cover_image_url: local_game ? local_game.cover_image_url : undefined,
-        cover_thumbnail_url: local_game ? local_game.cover_thumbnail_url : undefined,
-        players_min: $('#newgame_players_min').val(),
-        players_max: $('#newgame_players_max').val(),
-        players_age: $('#newgame_players_age').val(),
-        duration_min: $('#newgame_duration_min').val(),
-        duration_max: $('#newgame_duration_max').val()
-    });
+    // check the form with search parameters (browser handles feedback)
+    // TODO: test on multiple modern browsers    
+    var addgame_form_element = $("#add_game_form")[0];
+    addgame_form_element.reportValidity();
 
-    // id this is an edit, we'll have passed a local game with _id and _rev db info
-    tmp_new_game._id = local_game ? local_game._id : undefined;
-    tmp_new_game._rev = local_game ? local_game._rev : undefined;
-    
-    // if a game was provided, treat this as an edit, else as an add
-    // TODO: maybe move this to db code section?
-    if(!!tmp_new_game._id && !!tmp_new_game._id) {
-        game_db_edit(tmp_new_game);
-    } else {
-        game_db_add(tmp_new_game);
+    // if valid values are entered, continue with processing
+    if (addgame_form_element.checkValidity()) {
+
+        // any potential game that's passed when opening the form
+        var local_game = e.data['game_doc'];
+        
+        var tmp_new_game = new GameDoc({
+            bgg_id: !!local_game ? local_game.bgg_id : undefined,
+            bgg_version: !!local_game ? local_game.bgg_version : undefined,
+            bgg_altname: !!local_game ? local_game.bgg_altname : undefined,
+            title: $('#newgame_title').val(),
+            cover_image_url: !!local_game ? local_game.cover_image_url : undefined,
+            cover_thumbnail_url: !!local_game ? local_game.cover_thumbnail_url : undefined,
+            players_min: $('#newgame_players_min').val(),
+            players_max: $('#newgame_players_max').val(),
+            players_age: $('#newgame_players_age').val(),
+            duration_min: $('#newgame_duration_min').val(),
+            duration_max: $('#newgame_duration_max').val()
+        });
+
+        // if this is an edit, we'll have passed a local game with _id and _rev db info
+        tmp_new_game._id = !!local_game ? local_game._id : undefined;
+        tmp_new_game._rev = !!local_game ? local_game._rev : undefined;
+
+        // if a game was provided, treat this as an edit, else as an add
+        // TODO: maybe move this to db code section?
+        if(!!tmp_new_game._id && !!tmp_new_game._id) {
+            game_db_edit(tmp_new_game);
+        } else {
+            game_db_add(tmp_new_game);
+        }
+
+        $('#app_menu_games').trigger('click');
     }
-    
-    close_game_popup();
-
-    return false;
 }
 
 function open_search_bgg() {
-
-    $('#add_game_screen').hide()
 
     // reset search form;
     $('#search_term').val('');
     $('#search_game_results').html('');
 
-    $('#screen_search_bgg').show()
+    navigate_overlay('#screen_search_bgg');
 }
 
 function close_search_bgg() {
@@ -291,38 +273,44 @@ function close_details_bgg() {
     $('#screen_search_bgg').show()
 }
 
+// TODO: docstring
+// TODO: remove event from this?
 function form_search_bgg(e) {
 
-    // prevent default form (redirectish) behavior
-    if (e.preventDefault) e.preventDefault();
+    // check the form with search parameters (browser handles feedback)
+    // TODO: test on multiple modern browsers    
+    var search_form_element = $("#search_game_form")[0];
+    search_form_element.reportValidity();
 
-    // TODO: show search spinner
+    // if valid values are entered, continue with processing
+    if (search_form_element.checkValidity()) {
 
-    //var tmp_form_inputs = e.target.getElementsByTagName('input');
-    var search_term = $('#search_term').val();
-    
-    search_bgg(search_term).then(function(search_result_list) {
+        // TODO: show search spinner
 
-        $('#search_game_results').html('');
-        search_result_list.forEach(function(search_result) {
-            
-            // TODO: use template
-            var tmp_html = $('<a class="search_result">[title] ([year])</a>'
-                .replace('[title]',search_result['title'])
-                .replace('[year]',search_result['year'])
-            );
-
-            $('#search_game_results').append($('<div></div>').append(tmp_html));
-
-            tmp_html.on('click',{bgg_id:search_result['bgg_id']},expand_search_result);
-
-        });
+        //var tmp_form_inputs = e.target.getElementsByTagName('input');
+        var search_term = $('#search_term').val();
         
-    }).catch(function(error){
-        console.log(error);
-    });
+        search_bgg(search_term).then(function(search_result_list) {
 
-    return false;
+            $('#search_game_results').html('');
+            search_result_list.forEach(function(search_result) {
+                
+                // TODO: use template
+                var tmp_html = $('<a class="search_result">[title] ([year])</a>'
+                    .replace('[title]',search_result['title'])
+                    .replace('[year]',search_result['year'])
+                );
+
+                $('#search_game_results').append($('<div></div>').append(tmp_html));
+
+                tmp_html.on('click',{bgg_id:search_result['bgg_id']},expand_search_result);
+
+            });
+            
+        }).catch(function(error){
+            console.log(error);
+        });
+    }
 }
 
 function expand_search_result(event) {
@@ -332,59 +320,64 @@ function expand_search_result(event) {
     // lookup the id on BoardGameGeeks, then update show the details screen
     get_bgg_data(bgg_id_lookup).then(function(result){
         
-        $('#screen_search_bgg').hide();
+        //$('#screen_search_bgg').hide();
 
-        bgg_details_game = result;
+        var bgg_details_game = result;
 
-        $('#bgg_details_title').html(bgg_details_game['title']);
+        // generate a game card (but remove the delete/edit buttons
+        var tmp_html = generate_game_card(bgg_details_game);
+        tmp_html.find('.game_record_title_spacer').remove();
+        $('#bgg_details_game').html('').append(tmp_html);
+
+        // $('#bgg_details_title').html(bgg_details_game['title']);
         
-        $('#bgg_details_cover').attr('src',bgg_details_game['cover_thumbnail_url']);
-        $('#bgg_details_players_min').html(bgg_details_game['players_min']);
-        $('#bgg_details_players_max').html(bgg_details_game['players_max']);
-        $('#bgg_details_age_min').html(bgg_details_game['players_age']);
-        $('#bgg_details_time_min').html(bgg_details_game['duration_min']);
-        $('#bgg_details_time_max').html(bgg_details_game['duration_max']);
+        // $('#bgg_details_cover').attr('src',bgg_details_game['cover_thumbnail_url']);
+        // $('#bgg_details_players_min').html(bgg_details_game['players_min']);
+        // $('#bgg_details_players_max').html(bgg_details_game['players_max']);
+        // $('#bgg_details_age_min').html(bgg_details_game['players_age']);
+        // $('#bgg_details_time_min').html(bgg_details_game['duration_min']);
+        // $('#bgg_details_time_max').html(bgg_details_game['duration_max']);
         
         // add main game as first alt name
         $('#bgg_details_altnames').html('');
-        var tmp_html = gethtml_bgg_altname(bgg_details_game['title']);
+        var tmp_html = gethtml_bgg_altname(bgg_details_game['title'],bgg_details_game);
         tmp_html.trigger('click');
         $('#bgg_details_altnames').append(tmp_html);
 
         // add any other alt names
         bgg_details_game['bgg_altnames'].forEach(function(title_alt) {
-            $('#bgg_details_altnames').append(gethtml_bgg_altname(title_alt));
+            $('#bgg_details_altnames').append(gethtml_bgg_altname(title_alt,bgg_details_game));
         });
 
         // add main version as first version
         $('#bgg_details_versions').html('');
-        var tmp_html = gethtml_bgg_version(bgg_details_game);
+        var tmp_html = gethtml_bgg_version(bgg_details_game,bgg_details_game);
 
         tmp_html.trigger('click');
         $('#bgg_details_versions').append(tmp_html);
 
         // add any other versions as well
         bgg_details_game['bgg_versions'].forEach(function(version) {
-            $('#bgg_details_versions').append(gethtml_bgg_version(version));
+            $('#bgg_details_versions').append(gethtml_bgg_version(version,bgg_details_game));
         });
 
         // update the eventhandler so that the 'select' game 
-        // reads out the form with selected bgg details
+        // fills out the 'addgame' form with selected bgg details
         $('#bgg_details_select').off();
         $('#bgg_details_select').on('click',function(event){
 
-            $('#screen_bgg_details').hide();
+            // the selected altname and version are used to fill the game
+            bgg_details_game.title = bgg_details_game.bgg_altname;
+            bgg_details_game.cover_image_url = bgg_details_game.bgg_version.cover_image_url;
+            bgg_details_game.cover_thumbnail_url = bgg_details_game.bgg_version.cover_thumbnail_url;
             
-            // TODO :read version etc.
-            // TODO: version image and thumbnail tracking...
-
             fill_game_edit_screen(bgg_details_game);
 
             // show the updated add game screen
-            $('#add_game_screen').show()
+            navigate_overlay('#add_game_screen');
         });
 
-        $('#screen_bgg_details').show();
+        navigate_overlay('#screen_bgg_details');
 
     }).catch(function(reject) {
         console.log(reject);
@@ -397,12 +390,12 @@ function expand_search_result(event) {
  * @param {*} in_title_alt 
  * @returns HTML element with click handler
  */
-function  gethtml_bgg_altname(in_title_alt) {
+function  gethtml_bgg_altname(in_title_alt,in_game_doc) {
 
     var tmp_html = $('<a></a>');
     tmp_html.html(in_title_alt);
     tmp_html.attr('class','details_screen_notselected');
-    tmp_html.on('click',{selected_alt: in_title_alt},select_bgg_altname);
+    tmp_html.on('click',{selected_alt: in_title_alt, base_gamedoc: in_game_doc},select_bgg_altname);
 
     return tmp_html;
 }
@@ -415,7 +408,10 @@ function  gethtml_bgg_altname(in_title_alt) {
 function select_bgg_altname(event) {
     
     // update reference to selected alt
-    bgg_details_game.selected_altname = event.data['selected_alt'];
+    // update reference to selected version
+    var selected_altname = event.data['selected_alt'];
+    var base_gamedoc = event.data['base_gamedoc'];
+    base_gamedoc.bgg_altname = selected_altname;
 
     // unselect previous selection
     $('#bgg_details_altnames>.details_screen_selected').attr('class','details_screen_notselected')
@@ -430,67 +426,36 @@ function select_bgg_altname(event) {
  * @param {*} in_version
  * @returns
  */
-function  gethtml_bgg_version(in_version) {
+function gethtml_bgg_version(in_version, in_game_doc) {
 
     // check if URL is defined, use default if it isn't
 
-    
+    var tmp_anchor = $('<a></a>');
+    //var tmp_html = $('<div></div>');
 
-    var tmp_html = $('<a></a>');
-    tmp_html.append('<img src="' + get_image_url(in_version, true) + '">')
-    tmp_html.append('<span>' + in_version['title'] + '</span>')
-    tmp_html.attr('class','details_screen_notselected');
-    tmp_html.on('click',{selected_version: in_version},select_bgg_version);
+    tmp_anchor.append('<img style="display:inline;width:25%;" class="game_version_cover" src="' + get_image_url(in_version, true) + '">')
+    tmp_anchor.append('<span>' + in_version['title'] + '</span>')
+    //tmp_anchor.append(tmp_html);
 
-    return tmp_html;
+    tmp_anchor.attr('class','details_screen_notselected');
+    tmp_anchor.on('click',{selected_version: in_version, base_gamedoc: in_game_doc},select_bgg_version);
+
+    return tmp_anchor;
 }
 
 function select_bgg_version(event) {
     
-    // update reference to selected alt
-    bgg_details_game.selected_version = event.data['selected_version'];
+    // update reference to selected version
+    var selected_version = event.data['selected_version'];
+    var base_gamedoc = event.data['base_gamedoc'];
+    base_gamedoc.bgg_version = selected_version;
 
     // unselect previous selection
-    $('#bgg_details_versions>.details_screen_selected').attr('class','details_screen_notselected');
+    $('#bgg_details_versions .details_screen_selected').attr('class','details_screen_notselected');
 
     // only select target of event
     $(event.target).attr('class','details_screen_selected');
 }
-
-/** 
- * Accept the data from the BGG details screen, and use it to fill the bgg add screen
- */
-// function select_details_bgg(event) {
-
-//     console.log(bgg_details_game);
-
- 
-//     var local_game = event.data.game_doc;
-
-//     $('#screen_bgg_details').hide();
-    
-//     fill_game_edit_screen(local_game);
-
-//     // // check if URL is defined, use default if it isn't
-//     // var image_url = bgg_details_game['selected_version']['image_url'];
-//     // image_url = (image_url !== undefined & image_url.length > 0) ?
-//     //                     image_url : '/images/game_box_missing.jpg'
-
-//     // // fill the details into the 'add game' screen
-//     // $('#newgame_title').val(bgg_details_game['selected_altname']);
-//     // $('#newgame_image').attr('src',image_url);
-//     // $('#newgame_players_min').val(bgg_details_game['players_min']);
-//     // $('#newgame_players_max').val(bgg_details_game['players_max']);
-//     // $('#newgame_players_age').val(bgg_details_game['players_age']);
-//     // $('#newgame_duration_min').val(bgg_details_game['duration_min']);
-//     // $('#newgame_duration_max').val(bgg_details_game['duration_max']);
-    
-//     // TODO: track bgg_id
-
-//     // show the updated add game screen
-//     $('#add_game_screen').show()
-// }
-
 
 function open_game_edit(event) {
     // TODO: merge with add game UI path
@@ -499,16 +464,15 @@ function open_game_edit(event) {
 
     fill_game_edit_screen(local_game);
 
-    // update the add game button to be for editing
-    $('#newgame_submit').html('Save changes');
     
+    // update the add game button to be for editing
+    $('#add_game_header').html(local_game['title']);
+    $('#newgame_submit').html('Save changes');
     // hide the search BGG button
-    // TODO: maybe the search bgg is still fine for editing...
     $('#add_game_searchbgg').hide();
     
-    // show the overlay and screen
-    $('#add_game_overlay').show();
-    $('#add_game_screen').show();
+    navigate_overlay('#add_game_screen');
+
 }
 
 /** 
@@ -516,38 +480,27 @@ function open_game_edit(event) {
  */
 function open_game_delete(event) {
 
-
     var local_game = event.data['game'];
 
-    $('#add_game_overlay').show();
-    $('#delete_game_screen .delete_game_text').html(local_game['title'])
-    
+    // show the game that is to be deleted
+    var tmp_card = generate_game_card(local_game);
+    tmp_card.find('.game_record_title_spacer').remove();
+    $('#delete_game_text').html('').append(tmp_card);
+
 
     // on confirming delete, send it to the database
-    $('#delete_game_screen .delete_game_confirm').on('click',function() {
+    $('#delete_game_confirm').off().on('click',function() {
         
         game_db_delete(local_game);
-        close_game_delete();
+        $('#app_menu_games').trigger('click');
     })
 
     // TODO: only needs to be bound once?
-    $('#delete_game_screen .delete_game_cancel').on('click',function() {
-        close_game_delete();
+    $('#delete_game_cancel').off().on('click',function() {
+        $('#app_menu_games').trigger('click');
     })
 
-    $('#delete_game_screen').show();
-
-    
-}
-
-function close_game_delete() {
-
-    // clear the binds on the links
-    $('#delete_game_screen .delete_game_confirm').off();
-    $('#delete_game_screen .delete_game_cancel').off();
-
-    $('#add_game_overlay').hide();
-    $('#delete_game_screen').hide();
+    navigate_overlay('#delete_game_screen');    
 }
 
 /**
@@ -571,13 +524,11 @@ $(document).ready(function() {
     /** menu stuff */
 
     // menu navigation functions
-    $('#app_menu_roll').on('click',{page_id: '#game_selection'},navigate_to);
-    $('#app_menu_games').on('click',{page_id: '#game_management'},navigate_to);
+    $('#app_menu_roll').on('click',{page_id: '#game_selection'},navigate_mainscreen);
+    $('#app_menu_games').on('click',{page_id: '#game_management'},navigate_mainscreen);
 
     /** gameroll stuff  */
 
-    // reroll without updating filters
-    $('#button_reroll').on('click',roll_for_game);
     // close all results and get access to the form again
     $('#button_updatefilters').on('click',close_results);
     $('#button_closenogame').on('click',close_results);
@@ -592,7 +543,8 @@ $(document).ready(function() {
 
     $('#add_game_searchbgg').on('click',open_search_bgg);
 
-    $("#search_game_form").submit(form_search_bgg);
+    // $("#search_game_form").submit(form_search_bgg);
+    $('#submit_search_bgg').on('click',form_search_bgg);
     $('#search_game_close').on('click',close_search_bgg);
     
     //$('#bgg_details_select').on('click',select_details_bgg);
@@ -601,25 +553,17 @@ $(document).ready(function() {
     $('#game_list_export').on('click',game_list_export);
     $('#game_list_import').on('click',game_list_import);
 
-    $('#roll_submit').on('click',function(event){
-        
-        var roll_form_element = $("#roll_form")[0];
-        roll_form_element.reportValidity();
+    // clicking the roll button
+    $('#roll_submit').on('click',init_roll_for_game);
 
-        if (roll_form_element.checkValidity()) {
-            //roll_form_element.submit();
-            get_game_list(event);
-        }
-    });
+    //$('#newgame_submit').on('click',);
+    
 
     // respond to device motion when rolling for games
     if (window.DeviceMotionEvent) {
         window.addEventListener('devicemotion', repond_to_shaking);
         will_respond_to_shaking = true;
     }
-
-    // navigate to initial page of the app
-    $('#app_menu_games').trigger('click');
 
     // populate game list
     generate_all_cards();
@@ -633,6 +577,11 @@ $(document).ready(function() {
         console.log('changes!',change);
         generate_all_cards();
     });
+
+    // show the main screen after loading and
+    // navigate to initial page of the app
+    $('#screen_main').show();    
+    $('#app_menu_roll').trigger('click');
 });
 
 

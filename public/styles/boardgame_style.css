@@ -1,3 +1,15 @@
+:root {
+    --main-bg-color: rgb(145, 191, 69);
+    --secondary-color: rgb(71, 95, 33);
+    --border-button-color: rgba(99, 133, 46);
+    --input-bg-color: rgba(255, 255, 255, 0.5);
+    --dark-bg-text-color: #eeeeee;
+    --light-bg-text-color: black;
+}
+
+/* #foo {
+    color: var(--main-color);
+} */
 
 * {
     box-sizing: border-box;
@@ -28,13 +40,11 @@ html, body, main {
     margin: 0;
     padding: 0;
     height: 100%;
-    width: 100%;
-    max-height: 100%;
-    
+    width: 100%;    
 }
 
 body {
-    background-color: rgb(145, 191, 69);
+    background-color: var(--main-bg-color);
 }
 
 main {
@@ -53,6 +63,17 @@ main {
     overflow-y: hidden;
 }
 
+/* styling for general overlays of app */
+.mainscreen_overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    
+    background-color: rgba(0,0,0, 0.5);
+
+    padding: 20px;
+}
 
 /* generic class for flexflow and scrollable containers *?
 /* TODO: make app use generic classes? */
@@ -65,28 +86,18 @@ main {
 .container_scrollable {
     min-height: 20%;
     overflow-y: auto;
-    flex: 1 1 auto;
-}
-
-/* styling for general overlays of app */
-.mainscreen_overlay {
-    position: fixed;
-    display: none;
-    width: 100%;
     height: 100%;
-    
-    background-color: rgba(0,0,0, 0.5);
-    /* color: #ffffff; */
-
-    padding: 20px;
+    flex: 0 1 auto;
 }
+
+
 
 .content_centerer {
     /* used to center content on the gameroll screens */
     display: flex;
     flex-flow: column;
     width: 100%;
-    /* height: 100%; */
+    height: 100%;
     flex: 1 1 auto;
     margin: 0px;
     padding: 0px;
@@ -96,7 +107,24 @@ main {
     /* contains all centered content */
     margin: auto;
     width:100%;
+    flex: 0 1 auto;
 }
+
+
+.content_fill {
+    height: 100%;
+    margin: auto;
+    width:100%;
+    flex: 1 1 auto;
+}
+
+
+
+
+
+
+
+
 
 
 /* styling for the game rolling panels */
@@ -108,7 +136,7 @@ main {
     padding: 10px;
     
     text-align: center;
-    background-color: rgb(145, 191, 69);
+    background-color: var(--main-bg-color);
 }
 
 .game_roll_panel img {
@@ -143,7 +171,7 @@ main {
     padding: 10px;
     
     text-align: center;
-    background-color: rgb(145, 191, 69);
+    /* background-color: var(--main-bg-color); */
     /* background-color: #444444; */
 }
 
@@ -157,8 +185,8 @@ main {
 
 input {
     padding: 10px 20px;
-    border: 0.1rem solid rgb(99, 133, 46);;
-    background-color: rgba(255, 255, 255, 0.5);
+    border: 0.1rem solid var(--border-button-color);
+    background-color: var(--input-bg-color);
     font: inherit;
 }
 
@@ -173,10 +201,10 @@ button {
 
 /* Styling for the menu */
 .app_menu {
-    background-color: rgb(99, 133, 46);
+    background-color: var(--secondary-color);
     /* background-color: rgb(145, 191, 69); */
     /* background-color: rgb(71, 95, 33); */
-    flex: 0 0 10%;
+    flex: 0 0 4rem;
     display: flex;
     flex-flow: row;
 }
@@ -206,8 +234,8 @@ button {
 }
 
 .app_menu .active_tab {
-    background-color: rgb(145, 191, 69);
-    color: black;
+    background-color: var(--main-bg-color);
+    color: var(--light-bg-text-color);
 }
 
 
@@ -220,45 +248,118 @@ button {
     text-align: center;
 }
 
+
 /* Styling for game management record cards */
 .game_record {
-    margin: 5px;
-    padding: 10px;
+    margin: 0.25rem;
+    padding: 0.25rem;
     
-    /* background-color: green; */
-    /* background: rgb(145, 191, 69); */
-    background-color: rgb(255,255,255,0.5);
-    border: 0.1rem solid rgb(99, 133, 46);
+    background-color: var(--input-bg-color);
+    border: 0.1rem solid var(--border-button-color);
 
-    overflow-x: hidden;
-    overflow-y: auto;
-    
-    text-align: left;
+    display:flex;
+    flex-flow: column;
+}
+
+.game_record_header {
+    flex: 0 1 1rem;    
+    display: flex;
+    flex-flow: row;
+    /* background-color: var(--main-bg-color); */
+    /* border-bottom: 0.1rem solid var(--border-button-color); */
+    color: var(--light-bg-text-color);
+}
+
+.game_record_header a {
+    background-color: var(--border-button-color);
+    color: var(--dark-bg-text-color);
+    /* width: 10%; */
+    /* height: 5%; */
+    /* overflow: hidden; */
+    margin: 0.05rem;
+    text-align: center;
+    width: 50%;
+    /* flex: 1 1 auto; */
+}
+
+.game_record_title_spacer {
+    flex: 0 0 15%;
+
+}
+
+.game_record_button_float {
+    width: 100%;
+    display: flex;
+    flex-flow: row;
+    height: 1.35em;
 }
 
 .game_record_title {
+    flex: 0 0 85%;
     font-size: larger;
     font-weight: bold;
     margin-bottom: 5px;
 }
 
+
 .game_record_info {
     
-    vertical-align: middle;
-    height: 100%;
-    overflow-y:auto;
+    flex: 0 0 auto;
+    display: flex;
+    flex-flow: row;
+
+    /* vertical-align: middle; */
+
+    /* height: 100%; */
+    /* overflow-y:auto; */
 }
 
-.game_record_info img {
-    max-width: 20%;
-    min-width: 40px;
-    margin-right: 10px;
-    float:left;
+.game_cover_box {
+    flex: 0 0 25%;
+}
+
+.game_cover {
+    width: 100%;
+    display:block;
+    /* height: 100%; */
+}
+
+.game_record_text {
+    /* flex: 0 0 80%; */
+    margin-left: 0.3rem;
+
+    /* max-width: 100%; */
+    /* max-height: 100%; */
+    /* max-width: 20%; */
+    /* min-width: 40px; */
+    /* margin-right: 10px; */
+    /* float:left; */
+}
+
+img.game_version_cover {
+    width: 25%;;
+    margin:0px;
 }
 
 .game_card_label{
     font-weight: bold;
 }
+
+
+
+#add_game_form {
+    /* max-height: 75%; */
+    height: 25rem;
+}
+
+.search_button {
+    display: block;
+    background-color: var(--border-button-color);
+    color: var(--dark-bg-text-color);
+    text-align: center;
+    padding: 1rem;
+}
+
 
 /* game management pages */
 .game_add_panel {
@@ -269,6 +370,44 @@ button {
     background-color: rgb(145, 191, 69);
     text-align: center;
 }
+
+.game_add_form {
+    width: 100%;
+    margin: auto;
+    padding: 10px;
+}
+
+.game_add_form input {
+    width: 100%;
+    margin: auto;
+    padding: 10px;
+}
+
+.game_search_form a {
+    padding: 1rem;
+    background-color: var(--border-button-color);
+    margin-left: 0.5rem;
+}
+
+.game_search_form {
+    width: 100%;
+    margin: auto;
+    padding: 0.5rem;
+}
+
+.game_search_form input {
+    width: 100%;
+    margin: auto;
+    padding: 0.5rem;
+}
+
+.search_form{
+
+}
+
+
+
+/* Game roll form */
 
 /* bgg search styles */
 .search_results a {
@@ -290,3 +429,76 @@ a.details_screen_notselected {
     /* background-color: peru; */
 }
 
+
+
+/** styling for app screens */
+.appscreen_header {
+    background-color: var(--secondary-color);
+    color: var(--dark-bg-text-color);
+    flex: 0 0 4rem;
+    display: flex;
+    flex-flow: row;
+
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */
+}
+
+.appscreen_footer {
+    /* background-color: var(--border-button-color); */
+    /* background-color: ; */
+    color: var(--dark-bg-text-color);
+    flex: 0 0 4rem;
+    display: flex;
+    flex-flow: row;
+}
+
+.appscreen_header div {
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */
+    text-align: center;
+}
+
+.appscreen_footer a {
+    /* height: 100%; */
+    width: 100%;
+    text-decoration-line: none;
+
+    background-color: var(--border-button-color);
+    margin: 0.1rem 0.05rem;
+    
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */
+    text-align: center;
+}
+
+.appscreen_footer a:hover {
+    cursor: pointer;
+}
+
+.mainscreen_overlay {
+    display: none;
+    padding: 0.5rem;
+}
+
+/* overlay screen styling */
+.overlay_screen {
+    display: none;
+    background-color: var(--main-bg-color);
+    border: 0.2rem solid var(--main-bg-color);
+}
+
+.overlay_screen img {
+    
+    max-width: 80%;
+    
+    width:80%;
+    display: block;
+    margin: 5px auto;
+}
+
+.subtext {
+    text-align: center;
+    font-style: italic;
+}
