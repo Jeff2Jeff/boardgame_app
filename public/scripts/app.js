@@ -5,6 +5,10 @@ var shake_from_main = true;
 // TODO: setup generic logging (dev vs production?)
 // TODO: add error handling
 
+// TODO: loading screen on BGG search
+// TODO: BGG search: no result feedback
+// TODO: prevent games with the same name in DB
+
 // global variable of game shortlist that's adjusted based on user input
 
 //var game_pick_list = [];
@@ -198,7 +202,7 @@ function open_game_popup(event) {
     fill_game_edit_screen(null);
     
     $('#add_game_header').html('New game');
-    $('#new_game_submit').html('Add game');
+    $('#newgame_submit').html('Add game');
     $('#add_game_searchbgg').show();
 
     navigate_overlay('#add_game_screen');
@@ -296,7 +300,8 @@ function form_search_bgg(e) {
             search_result_list.forEach(function(search_result) {
                 
                 // TODO: use template
-                var tmp_html = $('<a class="search_result">[title] ([year])</a>'
+                var tmp_html = $('<a class="search_result">[id]: [title] ([year])</a>'
+                    .replace('[id]',search_result['bgg_id'])    
                     .replace('[title]',search_result['title'])
                     .replace('[year]',search_result['year'])
                 );
@@ -371,6 +376,10 @@ function expand_search_result(event) {
             bgg_details_game.cover_image_url = bgg_details_game.bgg_version.cover_image_url;
             bgg_details_game.cover_thumbnail_url = bgg_details_game.bgg_version.cover_thumbnail_url;
             
+            // translate version to just store version name
+            // TODO: use separate structure for this?
+            bgg_details_game.bgg_version = bgg_details_game.bgg_version['title'];
+
             fill_game_edit_screen(bgg_details_game);
 
             // show the updated add game screen
