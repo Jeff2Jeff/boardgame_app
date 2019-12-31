@@ -89,7 +89,7 @@ function roll_for_game(game_pick_list) {
             // show the result on screen
             // TODO: move to some sort of 'fill' function?
             $('#roll_result_title').html(selected_game['title']);
-            $('#roll_result_img').attr('src', get_image_url(selected_game,true));
+            $('#roll_result_img').attr('src', get_image_url(selected_game,false));
             $('#roll_result_length').html(gamelist_length_initial);
 
             
