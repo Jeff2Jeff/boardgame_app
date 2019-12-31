@@ -583,7 +583,7 @@ $(document).ready(function() {
         since: 'now',
         include_docs: true
     }).on('change', function (change) {
-        console.log('changes!',change);
+        //console.log('changes!',change);
         generate_all_cards();
     });
 
