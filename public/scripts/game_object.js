@@ -1,5 +1,5 @@
-const MISSING_COVER_IMAGE = '/images/game_box_missing.jpg';
-const MISSING_COVER_THUMBNAIL = '/images/game_box_missing.jpg';
+const MISSING_COVER_IMAGE = './images/game_box_missing.jpg';
+const MISSING_COVER_THUMBNAIL = './images/game_box_missing.jpg';
 
 // Structure of a game, to make sure that all documents in 
 // and out of the database have a similar structure
